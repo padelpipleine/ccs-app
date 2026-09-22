@@ -27,12 +27,12 @@ Dashboard → **Workers & Pages → Create → Workers → Import a repository**
 | Setting | Value |
 | --- | --- |
 | Worker name | `ccs-app` (must match `name` in `wrangler.jsonc`) |
-| Production branch | the branch you merge to (e.g. `main`) |
+| Production branch | `main` (feature branches are merged into it via pull requests; pushes to other branches upload a preview version) |
 | Build command | `npm run build` (recommended; the build also runs automatically after `npm install`, so it works if this is left blank) |
 | Deploy command | `npx wrangler deploy` (the default; `npx wrangler versions upload` on preview branches is fine too) |
 | Root directory | `/` |
 
-Pushes to the production branch deploy live; pushes to other branches upload a preview version with its own URL.
+Merging a pull request into `main` deploys live; pushes to other branches upload a preview version with its own URL.
 
 ### Secrets (Worker → Settings → Variables and Secrets)
 
