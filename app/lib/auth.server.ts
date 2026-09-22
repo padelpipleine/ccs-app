@@ -7,13 +7,13 @@ import type { User } from "~/db/schema";
 const SESSION_DAYS = 60;
 const CODE_MINUTES = 10;
 
-function sessionCookie(env: Env) {
+function sessionCookie(env: Env, request?: Request) {
   const secret = env.SESSION_SECRET || "dev-only-insecure-secret-change-me";
   return createCookie("ccs_session", {
     httpOnly: true,
     sameSite: "lax",
     path: "/",
-    secure: !env.APP_URL?.startsWith("http://"),
+    secure: request ? new URL(request.url).protocol === "https:" : true,
     secrets: [secret],
     maxAge: SESSION_DAYS * 86400,
   });
@@ -61,6 +61,7 @@ export async function startLogin(env: Env, rawEmail: string): Promise<{ devCode?
 /** Step 2: verify the code, create/find the user, and return a Set-Cookie header. */
 export async function completeLogin(
   env: Env,
+  request: Request,
   rawEmail: string,
   code: string,
 ): Promise<{ ok: true; headers: HeadersInit; user: User; isNew: boolean } | { ok: false; error: string }> {
@@ -107,12 +108,12 @@ export async function completeLogin(
     expiresAt: new Date(Date.now() + SESSION_DAYS * 86400_000).toISOString(),
   });
   await db.update(schema.users).set({ lastSeenAt: new Date().toISOString() }).where(eq(schema.users.id, user.id));
-  const cookie = sessionCookie(env);
+  const cookie = sessionCookie(env, request);
   return { ok: true, headers: { "Set-Cookie": await cookie.serialize(sessionId) }, user, isNew };
 }
 
 export async function getUser(request: Request, env: Env): Promise<User | null> {
-  const cookie = sessionCookie(env);
+  const cookie = sessionCookie(env, request);
   const sessionId = (await cookie.parse(request.headers.get("Cookie"))) as string | null;
   if (!sessionId) return null;
   const db = getDb(env);
@@ -150,7 +151,7 @@ export async function requireAdmin(request: Request, env: Env): Promise<User> {
 }
 
 export async function logout(request: Request, env: Env): Promise<HeadersInit> {
-  const cookie = sessionCookie(env);
+  const cookie = sessionCookie(env, request);
   const sessionId = (await cookie.parse(request.headers.get("Cookie"))) as string | null;
   if (sessionId) await getDb(env).delete(schema.sessions).where(eq(schema.sessions.id, sessionId));
   return { "Set-Cookie": await cookie.serialize("", { maxAge: 0 }) };

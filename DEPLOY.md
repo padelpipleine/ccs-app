@@ -7,64 +7,54 @@ Static files are served by the Worker's built-in assets. There is nothing else t
 > entry (`workers/app.ts`), a D1 binding and a cron trigger, which Pages does not support.
 > If you already created a Pages project for this repo, delete it and follow the steps below.
 
-## 1. One-time setup (5 minutes, from your laptop)
+## 1. One-time setup: the database
 
-```bash
-git clone https://github.com/padelpipleine/ccs-app
-cd ccs-app
-npm install
-npx wrangler login          # opens the browser, log in to Cloudflare
-npm run setup:cloudflare    # creates the D1 database, runs migrations, sets secrets, deploys
-git commit -am "Add D1 database id" && git push
-```
+The Worker needs one D1 database called `ccs-db`. Create it once, either way:
 
-`setup:cloudflare` writes the new D1 `database_id` into `wrangler.jsonc`. **Commit that change**, otherwise
-Cloudflare's git builds will fail with *"Couldn't find a D1 DB with the name or binding 'ccs-db'"*.
+- **Dashboard:** Storage & Databases → D1 SQL Database → Create → name `ccs-db` → copy its **Database ID**.
+- **Terminal:** `npx wrangler login` then `npx wrangler d1 create ccs-db` and copy the id it prints.
 
-Then set the secrets the script can't create for you (dashboard → Workers & Pages → `ccs-app` → Settings →
-Variables and Secrets, or `npx wrangler secret put NAME`):
+Paste that id into `wrangler.jsonc` in place of `REPLACE_WITH_YOUR_D1_DATABASE_ID` and push. Nothing else is
+needed for the database: **the Worker applies its own schema migrations on first request**, and on every deploy
+after that, so there is no migration command to remember.
 
-| Secret | Required | Where to get it |
-| --- | --- | --- |
-| `RESEND_API_KEY` | **Yes** — members sign in with an emailed code | [resend.com](https://resend.com) → API Keys. Also verify your sending domain there. |
-| `EMAIL_FROM` | Yes | e.g. `Crosscourt Social <club@crosscourt.social>` (must be on the verified domain) |
-| `STRIPE_SECRET_KEY` | Optional | Stripe dashboard → Developers → API keys. Enables card payments for extra sessions and tickets. |
-| `STRIPE_WEBHOOK_SECRET` | Optional | Stripe → Webhooks → add endpoint `https://<your-worker-url>/webhooks/stripe` for `checkout.session.completed`. |
+(`npm run setup:cloudflare` still exists and does the same plus secrets and a deploy, if you prefer one command.)
 
-Already set by the script: `SESSION_SECRET`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`.
-
-Finally, in `wrangler.jsonc` set:
-
-- `APP_URL` to your real URL (the `*.workers.dev` URL printed by the deploy, or your custom domain), and
-- `ADMIN_EMAILS` to the admins' email addresses, comma separated. Those people get the admin area
-  automatically when they sign in.
-
-## 2. Automatic deploys on every push (Cloudflare git integration)
+## 2. Connect the repo (Cloudflare git integration)
 
 Dashboard → **Workers & Pages → Create → Workers → Import a repository** → pick `padelpipleine/ccs-app`.
 
-Use exactly these settings:
-
 | Setting | Value |
 | --- | --- |
-| Project / Worker name | `ccs-app` (must match `name` in `wrangler.jsonc`) |
-| Production branch | `main` (or whichever branch you merge to) |
-| Build command | `npm run build` |
-| Deploy command | `npx wrangler d1 migrations apply ccs-db --remote && npx wrangler deploy` |
+| Worker name | `ccs-app` (must match `name` in `wrangler.jsonc`) |
+| Production branch | the branch you merge to (e.g. `main`) |
+| Build command | `npm run build` (recommended; the build also runs automatically after `npm install`, so it works if this is left blank) |
+| Deploy command | `npx wrangler deploy` (the default; `npx wrangler versions upload` on preview branches is fine too) |
 | Root directory | `/` |
-| Build variables | none needed (`NODE_VERSION` 22 is picked up from `.nvmrc`) |
 
-The deploy command applies any new database migrations first, so schema changes ship with the code.
+Pushes to the production branch deploy live; pushes to other branches upload a preview version with its own URL.
 
-### Why builds were failing before
+### Secrets (Worker → Settings → Variables and Secrets)
 
-The usual causes, in order of likelihood:
+| Secret | Required | Where to get it |
+| --- | --- | --- |
+| `SESSION_SECRET` | **Yes** | Any long random string (e.g. `openssl rand -hex 32`). Signs the login cookies. |
+| `RESEND_API_KEY` | **Yes** for real sign-in emails | [resend.com](https://resend.com) → API Keys, and verify your sending domain there. |
+| `EMAIL_FROM` | Yes | e.g. `Crosscourt Social <club@crosscourt.social>` on the verified domain. |
+| `DEV_SHOW_LOGIN_CODE` | Temporary | Set to `1` to show the sign-in code on screen while email isn't configured yet. **Remove before members use it.** |
+| `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | For push | Run `node scripts/generate-vapid.mjs`; subject is `mailto:contact@crosscourt.social`. |
+| `STRIPE_SECRET_KEY` | Optional | Stripe → Developers → API keys. Enables card payments. |
+| `STRIPE_WEBHOOK_SECRET` | Optional | Stripe → Webhooks → endpoint `https://<worker-url>/webhooks/stripe`, event `checkout.session.completed`. |
 
-1. **Project created as Pages instead of Workers.** Pages has no Worker entry / D1 / cron support. Recreate it under Workers.
-2. **Placeholder `database_id` in `wrangler.jsonc`.** Run `npm run setup:cloudflare` once and commit the result.
-3. **Wrong build or deploy command.** They must be `npm run build` and `npx wrangler deploy` (see table).
-4. **Worker name mismatch** between the dashboard project and `wrangler.jsonc` → creates a second Worker without bindings.
-5. **Node version too old.** The build needs Node 20+; `.nvmrc` pins 22.
+Also set `ADMIN_EMAILS` in `wrangler.jsonc` to the admins' emails, comma separated.
+
+### If a build fails
+
+- *"assets.directory … does not exist"*: the build didn't run. Set Build command to `npm run build` (or pull the
+  latest code, which builds on install).
+- *"binding DB of type d1 must have a valid database_id"*: step 1 above wasn't done.
+- *"Couldn't find a D1 DB with the name or binding"*: the id in `wrangler.jsonc` doesn't belong to this account.
+- Project created as **Pages** instead of Workers: Pages can't run this app; recreate it under Workers.
 
 ## 3. Alternative: deploy from GitHub Actions
 
@@ -75,14 +65,13 @@ then uncomment the `push:` trigger. Don't enable both methods.
 ## 4. Custom domain
 
 Dashboard → the Worker → Settings → Domains & Routes → Add → Custom domain, e.g. `app.crosscourt.social`.
-Then update `APP_URL` in `wrangler.jsonc` and redeploy. Push notifications and the PWA "Add to Home Screen"
-need HTTPS, which Cloudflare provides automatically.
+Push notifications and the PWA "Add to Home Screen" need HTTPS, which Cloudflare provides automatically.
 
 ## 5. Day-to-day
 
 - **Logs:** dashboard → Worker → Observability (enabled in `wrangler.jsonc`), or `npx wrangler tail`.
 - **Database:** `npx wrangler d1 execute ccs-db --remote --command "select count(*) from users"`.
 - **Schema change:** edit `app/db/schema.ts` → `npm run db:generate` → commit the new file in `drizzle/`.
-  It is applied on the next deploy.
+  The Worker applies it on the first request after the next deploy.
 - **Hourly cron** (`triggers.crons`) sends session reminders, expires stale partner invites and closes
   past sessions. Nothing to configure.

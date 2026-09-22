@@ -20,7 +20,6 @@
   ],
   "vars": {
     "APP_NAME": "Crosscourt Social",
-    "APP_URL": "https://ccs-app.workers.dev",
     "TIMEZONE": "Europe/Madrid",
     // Comma-separated list of emails that are admins automatically.
     "ADMIN_EMAILS": "hi@jgmetzger.com"

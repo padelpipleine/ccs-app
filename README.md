@@ -67,7 +67,8 @@ npm run db:seed:local               # optional demo venues, sessions, events, pe
 npm run dev                         # http://localhost:5173
 ```
 
-Sign in with an email listed in `ADMIN_EMAILS` (`wrangler.jsonc`) to get the admin area.
+Sign in with an email listed in `ADMIN_EMAILS` (`wrangler.jsonc`) to get the admin area. The database schema is
+applied automatically by the Worker on first request (locally and in production).
 
 Other scripts: `npm run typecheck`, `npm run build`, `npm run db:generate` (after editing the schema),
 `node scripts/generate-vapid.mjs` (push keys).

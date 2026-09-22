@@ -18,7 +18,7 @@ export async function action({ request, context }: Route.ActionArgs) {
   const email = String(form.get("email") ?? "");
   const code = String(form.get("code") ?? "");
   const next = String(form.get("next") ?? "/");
-  const result = await completeLogin(context.cloudflare.env, email, code);
+  const result = await completeLogin(context.cloudflare.env, request, email, code);
   if (!result.ok) return { error: result.error };
   const target = !result.user.name ? "/onboarding" : next.startsWith("/") ? next : "/";
   throw redirect(target, { headers: result.headers });

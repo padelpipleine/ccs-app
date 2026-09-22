@@ -49,7 +49,7 @@ export async function action({ request, context, params }: Route.ActionArgs) {
   const item = await loadItem(env, params.type, params.id, user.id);
   if (!item) throw new Response("Not found", { status: 404 });
   if (!stripeEnabled(env)) return { error: "Card payments aren't enabled." };
-  const base = env.APP_URL.replace(/\/$/, "");
+  const base = new URL(request.url).origin;
   const { url } = await createCheckout(env, {
     amountCents: item.amount,
     name: item.name,

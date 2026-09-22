@@ -1,6 +1,5 @@
 # Copy to .dev.vars for local development (never commit .dev.vars).
 SESSION_SECRET=change-me-to-a-long-random-string
-APP_URL=http://localhost:5173
 # Shows the sign-in code on screen instead of emailing it (dev only).
 DEV_SHOW_LOGIN_CODE=1
 # Optional in dev:

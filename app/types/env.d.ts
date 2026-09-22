@@ -1,6 +1,7 @@
 // Secrets are not listed in wrangler.jsonc `vars`, so they are declared here.
 // Set them with `wrangler secret put NAME` (or in .dev.vars for local dev).
 interface Env {
+  APP_URL?: string;
   SESSION_SECRET?: string;
   RESEND_API_KEY?: string;
   EMAIL_FROM?: string;
