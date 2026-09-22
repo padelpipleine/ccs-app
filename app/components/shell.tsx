@@ -105,7 +105,7 @@ const adminNav = [
   { to: "/admin/matches", label: "Sessions", icon: Icons.play },
   { to: "/admin/events", label: "Events", icon: Icons.star },
   { to: "/admin/members", label: "Members", icon: Icons.users },
-  { to: "/admin/perks", label: "Perks & sponsors", icon: Icons.tag },
+  { to: "/admin/perks", label: "Perks & partners", icon: Icons.tag },
   { to: "/admin/venues", label: "Venues", icon: Icons.pin },
   { to: "/admin/notify", label: "Notify members", icon: Icons.megaphone },
   { to: "/admin/settings", label: "Club settings", icon: Icons.settings },

@@ -1,7 +1,7 @@
 # Crosscourt Social · members app
 
 The booking and social hub for [Crosscourt Social](https://club.crosscourt.social/), Mallorca's members'
-padel club. Members book hosted sessions, bring partners at their level, join events and use sponsor perks.
+padel club. Members book hosted sessions, bring partners at their level, join events and use perks from Crosscourt Partners.
 Admins run the club from the same app.
 
 **Deployment:** see [DEPLOY.md](./DEPLOY.md). The app runs on a Cloudflare Worker with a D1 database.
@@ -21,7 +21,7 @@ Admins run the club from the same app.
   social points.
 - **Events**: fashion show, retreats, pool parties, drinks. Free or ticketed, optional +1 guests and guest price,
   capacity with waitlist.
-- **Member perks**: sponsor discounts by category, with codes and how-to-redeem, unlocked for active members.
+- **Member perks**: Crosscourt Partner discounts by category, with codes and how-to-redeem, unlocked for active members.
 - **Members directory** to find partners at your level.
 - **Club status**: club points for playing, attending events and bringing partners; status tiers (Rookie → Icon),
   badges and a club ranking. The **padel level** is separate and set only by the coach.
@@ -38,7 +38,7 @@ Admins run the club from the same app.
   list with attendance (awards points), mark payments received / waive, remove players, message the players,
   cancel with reason (notifies everyone).
 - **Events**: same idea with guest list, check-in, payments, messaging.
-- **Venues**, **Perks & sponsors**, **Notify members** (push + in-app, by audience), **Club settings** (weekly
+- **Venues**, **Perks & partners**, **Notify members** (push + in-app, by audience), **Club settings** (weekly
   allowance, extra price, partner level gap, cancellation window, booking window, payment mode and instructions,
   points values, welcome message, WhatsApp link).
 

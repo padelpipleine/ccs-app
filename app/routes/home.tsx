@@ -127,7 +127,7 @@ export default function Home({ loaderData: d }: Route.ComponentProps) {
 
       {d.perks.length > 0 && (
         <section>
-          <SectionHead title="Member perks" to="/perks" />
+          <SectionHead title="Partner perks" to="/perks" />
           <div className="grid gap-3 sm:grid-cols-3">
             {d.perks.map((p) => (
               <Link key={p.id} to="/perks" className="card p-4">

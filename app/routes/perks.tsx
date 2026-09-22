@@ -18,10 +18,10 @@ export default function Perks({ loaderData: d }: Route.ComponentProps) {
   const cats = Array.from(new Set(d.perks.map((p) => p.category)));
   return (
     <div>
-      <PageHeader eyebrow="Sponsors & partners" title="Member perks" subtitle="Show this page (or your code) when you pay. Deals are for active members only." />
+      <PageHeader eyebrow="Crosscourt Partners" title="Member perks" subtitle="Deals from our Crosscourt Partners around the island. Show this page (or your code) when you pay. Active members only." />
       {!d.active && <p className="alert alert-warn mb-4">Perks unlock once your membership is approved.</p>}
       {d.perks.length === 0 ? (
-        <Empty title="Partners are being signed up" body="Wine from island bodegas, spa treatments, clothing and more. Each new one lands here." />
+        <Empty title="Crosscourt Partners are being signed up" body="Wine from island bodegas, spa treatments, clothing and more. Each new one lands here." />
       ) : (
         cats.map((cat) => (
           <section key={cat} className="mb-6">

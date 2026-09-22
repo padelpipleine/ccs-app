@@ -8,7 +8,7 @@ import { Alert, Field, PageHeader } from "~/components/ui";
 import { PERK_CATEGORIES } from "~/lib/format";
 import type { Perk } from "~/db/schema";
 
-export const meta: Route.MetaFunction = () => [{ title: "Perks & sponsors · Admin" }];
+export const meta: Route.MetaFunction = () => [{ title: "Perks & partners · Admin" }];
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   const env = context.cloudflare.env;
@@ -28,7 +28,7 @@ export async function action({ request, context }: Route.ActionArgs) {
     return { success: "Deleted." };
   }
   const s = (k: string) => String(f.get(k) ?? "").trim();
-  if (!s("sponsorName") || !s("title")) return { error: "Sponsor name and offer title are required." };
+  if (!s("sponsorName") || !s("title")) return { error: "Partner name and offer title are required." };
   const values = {
     sponsorName: s("sponsorName"),
     category: s("category") || "other",
@@ -60,7 +60,7 @@ export default function AdminPerks({ loaderData: d, actionData }: Route.Componen
   const editing = params.get("edit");
   return (
     <div className="mx-auto max-w-3xl">
-      <PageHeader eyebrow="Admin" title="Perks & sponsors" subtitle="Member discounts from restaurants, bars, spas, shops…" />
+      <PageHeader eyebrow="Admin" title="Perks & partners" subtitle="Crosscourt Partners: member deals from restaurants, bars, spas, shops and more." />
       {actionData?.error && <Alert kind="error">{actionData.error}</Alert>}
       {actionData?.success && <Alert kind="success">{actionData.success}</Alert>}
       <div className="mt-4 space-y-3">
@@ -90,7 +90,7 @@ export default function AdminPerks({ loaderData: d, actionData }: Route.Componen
         )}
       </div>
       <div className="mt-8">
-        <h2 className="mb-2 text-lg font-semibold">Add a perk</h2>
+        <h2 className="mb-2 text-lg font-semibold">Add a partner perk</h2>
         <PerkForm />
       </div>
     </div>
@@ -102,7 +102,7 @@ function PerkForm({ p }: { p?: Perk }) {
     <Form method="post" className="card space-y-3 p-4">
       {p && <input type="hidden" name="id" value={p.id} />}
       <div className="grid gap-3 sm:grid-cols-3">
-        <Field label="Sponsor">
+        <Field label="Crosscourt Partner">
           <input name="sponsorName" required defaultValue={p?.sponsorName ?? ""} className="input" placeholder="Bodega Son Vives" />
         </Field>
         <Field label="Category">
