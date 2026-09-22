@@ -2,6 +2,7 @@ import { createRequestHandler } from "react-router";
 import { runScheduledJobs } from "../app/lib/jobs.server";
 import { handleStripeWebhook } from "../app/lib/payments.server";
 import { ensureMigrated } from "../app/lib/migrate.server";
+import { handleSiteSignup } from "../app/lib/site-sync.server";
 
 declare module "react-router" {
   export interface AppLoadContext {
@@ -24,6 +25,9 @@ export default {
     await ensureMigrated(env);
     if (url.pathname === "/webhooks/stripe" && request.method === "POST") {
       return handleStripeWebhook(request, env);
+    }
+    if (url.pathname === "/webhooks/site-signup" && request.method === "POST") {
+      return handleSiteSignup(request, env);
     }
     return requestHandler(request, { cloudflare: { env, ctx } });
   },

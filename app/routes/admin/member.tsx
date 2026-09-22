@@ -104,9 +104,18 @@ export default function AdminMember({ loaderData: d, actionData }: Route.Compone
             <Avatar name={m.name || m.email} url={m.avatarUrl} size={48} />
             <div className="text-sm text-ink-70">
               {m.gender ?? "gender not set"} · {m.handedness ?? "hand ?"} · {m.preferredSide ?? "side ?"} · {m.playStyle ?? "style ?"}
+              {m.sessionPref && ` · wants ${m.sessionPref}`}
               <br />
               {m.phone && <span>{m.phone} · </span>}
               {m.instagram}
+              {(m.ambassador || m.photoConsent) && (
+                <span className="block text-xs text-ink-50">
+                  {m.ambassador && `Ambassador: ${m.ambassador}`}
+                  {m.ambassador && m.photoConsent && " · "}
+                  {m.photoConsent && `Photos: ${m.photoConsent}`}
+                </span>
+              )}
+              {m.onboardingNotes && <span className="block text-xs text-ink-50">“{m.onboardingNotes}”</span>}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">

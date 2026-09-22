@@ -159,10 +159,14 @@ export async function requireUser(request: Request, env: Env): Promise<User> {
   return user;
 }
 
-/** Member with a completed profile and active status. */
+export function needsOnboarding(user: Pick<User, "name" | "onboardedAt">) {
+  return !user.name || !user.onboardedAt;
+}
+
+/** Member who has completed the in-app profile questions. */
 export async function requireActiveMember(request: Request, env: Env): Promise<User> {
   const user = await requireUser(request, env);
-  if (!user.name) throw redirect("/onboarding");
+  if (needsOnboarding(user)) throw redirect("/onboarding");
   return user;
 }
 

@@ -76,7 +76,13 @@ Push notifications and the PWA "Add to Home Screen" need HTTPS, which Cloudflare
    hand, side, Instagram and self-declared level come across; the coach still sets the real padel level.
 3. Admins get an in-app notification listing new members. If Resend is configured, each new active member is
    emailed a one-time sign-in link automatically; otherwise open the member and use **Send via WhatsApp**.
-4. The app never changes anything on the site, and never overwrites data an admin or member has edited in the app.
+4. **Straight after paying**, the site asks the app for a one-time sign-in link (`POST /webhooks/site-signup`,
+   authenticated with the shared key) and sends the member into the app's onboarding questions, signed in with the
+   email they paid with. The site's `/welcome` links in older emails redirect there too.
+5. The app never changes anything on the site, and never overwrites data an admin or member has edited in the app.
+
+The shared key must be identical on both Workers: `CRM_KEY` in the site's `club/wrangler.jsonc` and the
+`SITE_CRM_KEY` secret here. The site's `APP_URL` var must point at this app.
 
 ## 6. Day-to-day
 

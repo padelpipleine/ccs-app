@@ -36,7 +36,12 @@ export const users = sqliteTable(
     // Link to the sign-up site's CRM record (club.crosscourt.social)
     siteMemberId: text("site_member_id"),
     siteStatus: text("site_status"), // prospect | contacted | started | paid | lapsed
-    selfLevel: text("self_level"), // what the member said on the welcome form; the coach sets the real level
+    selfLevel: text("self_level"), // what the member said about their own level; the coach sets the real level
+    sessionPref: text("session_pref", { enum: ["ladies", "mixed", "both"] }),
+    ambassador: text("ambassador", { enum: ["yes", "maybe", "no"] }),
+    photoConsent: text("photo_consent", { enum: ["yes", "no"] }),
+    onboardingNotes: text("onboarding_notes"),
+    onboardedAt: text("onboarded_at"), // set when the member completes the in-app profile questions
     siteSyncedAt: text("site_synced_at"),
     lastSeenAt: text("last_seen_at"),
     createdAt: text("created_at").notNull().default(now),
