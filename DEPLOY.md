@@ -88,7 +88,11 @@ Push notifications and the PWA "Add to Home Screen" need HTTPS, which Cloudflare
 4. **Straight after paying**, the site asks the app for a one-time sign-in link (`POST /webhooks/site-signup`,
    authenticated with the shared key) and sends the member into the app's onboarding questions, signed in with the
    email they paid with. The site's `/welcome` links in older emails redirect there too.
-5. The app never changes anything on the site, and never overwrites data an admin or member has edited in the app.
+5. **Only members can sign in.** An email the app doesn't know gets a "no membership under this email" message and
+   nothing is created. Members who started checkout but never paid, or whose membership lapsed, see a
+   membership page (with a join/renew link and an "I've paid — check again" button) instead of the app.
+   Admins in `ADMIN_EMAILS` are always let in.
+6. The app never changes anything on the site, and never overwrites data an admin or member has edited in the app.
 
 The shared key must be identical on both Workers: `CRM_KEY` in the site's `club/wrangler.jsonc` and the
 `SITE_CRM_KEY` secret here. The site's `APP_URL` var must point at this app.

@@ -1,6 +1,6 @@
 import { Link, redirect } from "react-router";
 import type { Route } from "./+types/login-link";
-import { completeLogin, needsOnboarding } from "~/lib/auth.server";
+import { completeLogin, postLoginTarget } from "~/lib/auth.server";
 import { Alert } from "~/components/ui";
 import { AuthFrame } from "./login";
 
@@ -14,7 +14,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   if (!email || !token) throw redirect("/login");
   const result = await completeLogin(context.cloudflare.env, request, email, token);
   if (!result.ok) return { error: result.error };
-  throw redirect(needsOnboarding(result.user) ? "/onboarding" : "/", { headers: result.headers });
+  throw redirect(postLoginTarget(result.user), { headers: result.headers });
 }
 
 export default function LoginLink({ loaderData }: Route.ComponentProps) {

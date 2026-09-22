@@ -1,6 +1,6 @@
 import { Form, redirect, useNavigation } from "react-router";
 import type { Route } from "./+types/login";
-import { getUser, startLogin } from "~/lib/auth.server";
+import { getUser, JOIN_URL, startLogin } from "~/lib/auth.server";
 import { Alert, Field } from "~/components/ui";
 
 export const meta: Route.MetaFunction = () => [{ title: "Sign in · Crosscourt Social" }];
@@ -16,7 +16,8 @@ export async function action({ request, context }: Route.ActionArgs) {
   const email = String(form.get("email") ?? "").trim();
   const next = String(form.get("next") ?? "/");
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { error: "Enter a valid email address." };
-  const { devCode, emailSent } = await startLogin(context.cloudflare.env, email);
+  const { devCode, emailSent, unknown } = await startLogin(context.cloudflare.env, email);
+  if (unknown) return { unknown: true, email };
   const params = new URLSearchParams({ email, next });
   if (devCode) params.set("dev", devCode);
   if (!emailSent && !devCode) params.set("nomail", "1");
@@ -35,7 +36,16 @@ export default function Login({ actionData }: Route.ComponentProps) {
         <Field label="Email">
           <input name="email" type="email" required autoComplete="email" inputMode="email" className="input" placeholder="you@example.com" autoFocus />
         </Field>
-        {actionData?.error && <Alert kind="error">{actionData.error}</Alert>}
+        {actionData && "error" in actionData && actionData.error && <Alert kind="error">{actionData.error}</Alert>}
+        {actionData && "unknown" in actionData && (
+          <Alert kind="warn">
+            We don't have a membership under <strong>{actionData.email}</strong>. Use the email you joined with, or{" "}
+            <a href={JOIN_URL} className="font-semibold underline">
+              join Crosscourt Social
+            </a>
+            .
+          </Alert>
+        )}
         <button className="btn btn-ink w-full" disabled={nav.state !== "idle"}>
           {nav.state !== "idle" ? "Sending…" : "Send my code"}
         </button>

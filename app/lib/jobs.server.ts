@@ -77,7 +77,7 @@ export async function runScheduledJobs(env: Env) {
   // 4. Pull new sign-ups and payment changes from the club site
   if (siteSyncConfigured(env)) {
     try {
-      await syncFromSite(env, (env.APP_URL || "https://ccs-app.plain-sound-433d.workers.dev").replace(/\/$/, ""));
+      await syncFromSite(env, (env.APP_URL || "https://app.crosscourt.social").replace(/\/$/, ""));
     } catch (err) {
       console.error("[site-sync] failed", err);
     }

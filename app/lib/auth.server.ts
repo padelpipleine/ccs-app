@@ -66,10 +66,23 @@ export async function createLoginLink(env: Env, origin: string, rawEmail: string
   return `${origin}/login/link?${new URLSearchParams({ email, token })}`;
 }
 
-/** Step 1: create and email a 6-digit code. Returns the code only when DEV_SHOW_LOGIN_CODE is set. */
-export async function startLogin(env: Env, rawEmail: string): Promise<{ devCode?: string; emailSent: boolean }> {
+export const JOIN_URL = "https://club.crosscourt.social/";
+
+/** Only existing members (created by the sign-up site, the sync, a sign-in link or an admin) and configured admins can sign in. */
+export async function isKnownMember(env: Env, email: string): Promise<boolean> {
+  if (isAdminEmail(env, email)) return true;
+  const row = await getDb(env).select({ id: schema.users.id }).from(schema.users).where(eq(schema.users.email, email)).get();
+  return Boolean(row);
+}
+
+/**
+ * Step 1: create and email a 6-digit code. Returns the code only when DEV_SHOW_LOGIN_CODE is set.
+ * Unknown emails get `unknown: true` and nothing is created or sent.
+ */
+export async function startLogin(env: Env, rawEmail: string): Promise<{ devCode?: string; emailSent: boolean; unknown?: boolean }> {
   const db = getDb(env);
   const email = normalizeEmail(rawEmail);
+  if (!(await isKnownMember(env, email))) return { emailSent: false, unknown: true };
   const code = randomCode();
   const expiresAt = new Date(Date.now() + CODE_MINUTES * 60_000).toISOString();
   await db.delete(schema.loginCodes).where(eq(schema.loginCodes.email, email));
@@ -106,6 +119,7 @@ export async function completeLogin(
   let user = await db.select().from(schema.users).where(eq(schema.users.email, email)).get();
   let isNew = false;
   const admin = isAdminEmail(env, email);
+  if (!user && !admin) return { ok: false, error: "We don't have a membership under this email." };
   if (!user) {
     isNew = true;
     const id = newId("u");
@@ -163,9 +177,22 @@ export function needsOnboarding(user: Pick<User, "name" | "onboardedAt">) {
   return !user.name || !user.onboardedAt;
 }
 
-/** Member who has completed the in-app profile questions. */
+/** Non-admins must have an active (paid) membership to use the app. */
+export function membershipBlocked(user: Pick<User, "status" | "role">) {
+  return user.role !== "admin" && user.status !== "active";
+}
+
+/** Where to send someone right after signing in. */
+export function postLoginTarget(user: User, next = "/") {
+  if (membershipBlocked(user)) return "/membership";
+  if (needsOnboarding(user)) return "/onboarding";
+  return next.startsWith("/") ? next : "/";
+}
+
+/** Active member who has completed the in-app profile questions. */
 export async function requireActiveMember(request: Request, env: Env): Promise<User> {
   const user = await requireUser(request, env);
+  if (membershipBlocked(user)) throw redirect("/membership");
   if (needsOnboarding(user)) throw redirect("/onboarding");
   return user;
 }

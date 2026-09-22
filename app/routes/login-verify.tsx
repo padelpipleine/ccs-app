@@ -1,6 +1,6 @@
 import { Form, Link, redirect, useNavigation } from "react-router";
 import type { Route } from "./+types/login-verify";
-import { completeLogin, needsOnboarding } from "~/lib/auth.server";
+import { completeLogin, postLoginTarget } from "~/lib/auth.server";
 import { Alert, Field } from "~/components/ui";
 import { AuthFrame } from "./login";
 
@@ -20,7 +20,7 @@ export async function action({ request, context }: Route.ActionArgs) {
   const next = String(form.get("next") ?? "/");
   const result = await completeLogin(context.cloudflare.env, request, email, code);
   if (!result.ok) return { error: result.error };
-  const target = needsOnboarding(result.user) ? "/onboarding" : next.startsWith("/") ? next : "/";
+  const target = postLoginTarget(result.user, next);
   throw redirect(target, { headers: result.headers });
 }
 
