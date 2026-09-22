@@ -105,7 +105,7 @@ export default function AdminMatch({ loaderData: d, actionData }: Route.Componen
         <GroupPill group={m.group} />
         {(m.levelMin != null || m.levelMax != null) && (
           <span className="pill pill-indigo">
-            Lvl {m.levelMin != null ? levelLabel(m.levelMin) : "any"}–{m.levelMax != null ? levelLabel(m.levelMax) : "any"}
+            Padel {m.levelMin != null ? levelLabel(m.levelMin) : "any"}–{m.levelMax != null ? levelLabel(m.levelMax) : "any"}
           </span>
         )}
         <span className="pill pill-bone">
@@ -119,7 +119,7 @@ export default function AdminMatch({ loaderData: d, actionData }: Route.Componen
       <section className="card mt-4">
         <div className="border-b border-line p-4">
           <h2 className="font-display font-semibold text-ink">Players & attendance</h2>
-          <p className="text-xs text-ink-50">Mark attendance after the session to award social points. Mark payments received for extra sessions.</p>
+          <p className="text-xs text-ink-50">Mark attendance after the session to award club points. Mark payments received for extra sessions.</p>
         </div>
         {active.length === 0 && <p className="p-4 text-sm text-ink-50">No bookings yet.</p>}
         <div className="divide-y divide-line">

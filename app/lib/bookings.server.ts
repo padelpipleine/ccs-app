@@ -37,7 +37,7 @@ export function eligibility(user: User, match: MatchDay, settings: Settings, tod
   if (match.date < today) return { ok: false, reason: "This session has already happened." };
   if (!groupEligible(user, match.group))
     return { ok: false, reason: match.group === "female" ? "This is a ladies-only session." : "This is a mixed session. Your membership is ladies-only." };
-  if (user.level == null) return { ok: false, reason: "Your level hasn't been set yet. Ask the club about the next level day." };
+  if (user.level == null) return { ok: false, reason: "Your padel level hasn't been set yet. Ask the club about the next level day." };
   if (!levelEligible(user, match))
     return { ok: false, reason: `This session is for levels ${match.levelMin ?? "any"}–${match.levelMax ?? "any"}. You're ${user.level.toFixed(1)}.` };
   const opensDays = num(settings, "bookingOpensDays");

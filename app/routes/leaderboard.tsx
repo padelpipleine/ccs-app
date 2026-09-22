@@ -6,7 +6,7 @@ import { getSettings, num } from "~/lib/settings.server";
 import { Avatar, PageHeader } from "~/components/ui";
 import { SOCIAL_LEVELS, socialLevel } from "~/lib/format";
 
-export const meta: Route.MetaFunction = () => [{ title: "Social ranking · Crosscourt Social" }];
+export const meta: Route.MetaFunction = () => [{ title: "Club ranking · Crosscourt Social" }];
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   const env = context.cloudflare.env;
@@ -19,7 +19,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 export default function Leaderboard({ loaderData: d }: Route.ComponentProps) {
   return (
     <div className="mx-auto max-w-2xl">
-      <PageHeader eyebrow="Gamified attendance" title="Social ranking" subtitle="Points for showing up, on and off court. Your playing level is separate and set by the coach." />
+      <PageHeader eyebrow="Club status" title="Club ranking" subtitle="Club points for showing up, on and off court. Nothing to do with your padel level, which only the coach sets." />
       <div className="card-bone mb-4 grid grid-cols-3 gap-2 p-4 text-center text-xs text-ink-70">
         <div>
           <p className="serif-num text-2xl text-ink">+{d.pts.attend}</p>play a session
@@ -44,10 +44,10 @@ export default function Leaderboard({ loaderData: d }: Route.ComponentProps) {
           </div>
         ))}
       </div>
-      <p className="eyebrow mb-2 mt-6">Social levels</p>
+      <p className="eyebrow mb-2 mt-6">Club status tiers</p>
       <div className="flex flex-wrap gap-2">
         {SOCIAL_LEVELS.map((l) => (
-          <span key={l.name} className="pill pill-outline">
+          <span key={l.name} className="pill pill-pink">
             {l.name} · {l.min}+
           </span>
         ))}

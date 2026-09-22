@@ -59,6 +59,7 @@ h3,
 }
 }
 
+@layer components {
 .eyebrow {
   font-family: var(--font-display);
   font-size: 11px;
@@ -347,13 +348,14 @@ h3,
 }
 .progress > div {
   height: 100%;
-  background: var(--color-teal);
+  background: var(--color-pink);
   border-radius: 999px;
   transition: width 340ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .prose-sm p + p {
   margin-top: 0.5rem;
+}
 }
 
 @media (prefers-reduced-motion: reduce) {

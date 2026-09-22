@@ -59,7 +59,7 @@ export async function action({ request, context, params }: Route.ActionArgs) {
       .where(eq(schema.users.id, member.id));
     if (level != null && level !== member.level) {
       await db.insert(schema.levelHistory).values({ id: newId("lh"), userId: member.id, level, assessedBy: admin.name || admin.email, notes: notes || null });
-      await notifyUsers(env, [member.id], { title: `Your level is now ${level.toFixed(1)}`, body: notes || "Set by the coach on level day. Fixed until the next assessment.", url: "/profile", kind: "level" });
+      await notifyUsers(env, [member.id], { title: `Your padel level is now ${level.toFixed(1)}`, body: notes || "Set by the coach on level day. Fixed until the next assessment.", url: "/profile", kind: "level" });
     }
     if (wasPending && status === "active") {
       await notifyUsers(env, [member.id], { title: "You're approved 🎾", body: "Welcome to Crosscourt Social. Book your first hosted session.", url: "/matches", kind: "membership" });
@@ -117,7 +117,7 @@ export default function AdminMember({ loaderData: d, actionData }: Route.Compone
             </Field>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Playing level" hint="Set on level day by the coach.">
+            <Field label="Padel level" hint="Set on level day by the coach.">
               <select name="level" defaultValue={m.level ?? ""} className="select">
                 <option value="">Not assessed</option>
                 {levelOptions().map((l) => (
@@ -155,7 +155,7 @@ export default function AdminMember({ loaderData: d, actionData }: Route.Compone
 
         <div className="space-y-4 lg:col-span-2">
           <Form method="post" className="card space-y-3 p-4">
-            <p className="font-display font-semibold text-ink">Social points · {m.socialPoints}</p>
+            <p className="font-display font-semibold text-ink">Club points · {m.socialPoints}</p>
             <div className="grid grid-cols-3 gap-2">
               <input name="points" type="number" className="input" placeholder="+10" />
               <input name="reason" className="input col-span-2" placeholder="Helped host the social" />

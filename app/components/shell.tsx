@@ -18,7 +18,7 @@ const sideNav = [
   { to: "/events", label: "Events", icon: Icons.star },
   { to: "/perks", label: "Member perks", icon: Icons.tag },
   { to: "/members", label: "Members", icon: Icons.users },
-  { to: "/leaderboard", label: "Social ranking", icon: Icons.trophy },
+  { to: "/leaderboard", label: "Club ranking", icon: Icons.trophy },
   { to: "/inbox", label: "Inbox", icon: Icons.bell },
   { to: "/profile", label: "Profile", icon: Icons.user },
 ];

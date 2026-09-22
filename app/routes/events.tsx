@@ -16,7 +16,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 export default function Events({ loaderData }: Route.ComponentProps) {
   return (
     <div>
-      <PageHeader eyebrow="Off court" title="Events" subtitle="Socials, retreats, the fashion show. Members first, at member rates." />
+      <PageHeader eyebrow="Off court" title="Events" subtitle="Socials, parties, retreats and more. Members first, at member rates." />
       {loaderData.events.length === 0 ? (
         <Empty title="Nothing scheduled yet" body="Events are announced here and by notification." />
       ) : (

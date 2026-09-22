@@ -127,7 +127,7 @@ export default function AdminEvent({ loaderData: d, actionData }: Route.Componen
       <section className="card mt-4">
         <div className="border-b border-line p-4">
           <h2 className="font-display font-semibold text-ink">Guest list</h2>
-          <p className="text-xs text-ink-50">Check people in on the night to award social points.</p>
+          <p className="text-xs text-ink-50">Check people in on the night to award club points.</p>
         </div>
         {active.length === 0 && <p className="p-4 text-sm text-ink-50">No registrations yet.</p>}
         <div className="divide-y divide-line">

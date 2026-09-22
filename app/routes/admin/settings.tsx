@@ -77,7 +77,7 @@ export default function Settings({ loaderData: { s, stripe }, actionData }: Rout
           </Field>
         </section>
         <section className="card space-y-4 p-5">
-          <h2 className="font-display font-semibold text-ink">Social points</h2>
+          <h2 className="font-display font-semibold text-ink">Club points</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
             {(
               [

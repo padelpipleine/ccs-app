@@ -30,7 +30,7 @@ export function MatchCard({ m }: { m: MatchCardData }) {
           <GroupPill group={m.group} />
           {(m.levelMin != null || m.levelMax != null) && (
             <span className="pill pill-indigo">
-              Lvl {m.levelMin != null ? levelLabel(m.levelMin) : "any"}–{m.levelMax != null ? levelLabel(m.levelMax) : "any"}
+              Padel {m.levelMin != null ? levelLabel(m.levelMin) : "any"}–{m.levelMax != null ? levelLabel(m.levelMax) : "any"}
             </span>
           )}
         </div>

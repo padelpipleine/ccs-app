@@ -59,13 +59,13 @@ export default function Home({ loaderData: d }: Route.ComponentProps) {
             </p>
             <p className="text-[11px] text-on-ink-muted">hosted session{d.allowance === 1 ? "" : "s"} used</p>
           </div>
-          <div className="rounded-xl bg-white/5 p-3">
-            <p className="eyebrow text-on-ink-muted">Your level</p>
+          <div className="rounded-xl border border-indigo/60 bg-indigo/25 p-3">
+            <p className="eyebrow text-indigo-soft">Padel level</p>
             <p className="serif-num text-2xl text-bone">{d.user.level?.toFixed(1) ?? "—"}</p>
-            <p className="text-[11px] text-on-ink-muted">set on level day</p>
+            <p className="text-[11px] text-on-ink-muted">set by the coach</p>
           </div>
-          <div className="col-span-2 rounded-xl bg-white/5 p-3 sm:col-span-1">
-            <p className="eyebrow text-on-ink-muted">Social level</p>
+          <div className="col-span-2 rounded-xl border border-pink/40 bg-pink/10 p-3 sm:col-span-1">
+            <p className="eyebrow text-pink">Club status</p>
             <p className="font-display text-lg font-semibold text-bone">{sl.current.name}</p>
             <div className="progress mt-1">
               <div style={{ width: `${Math.round(sl.progress * 100)}%` }} />
@@ -79,11 +79,11 @@ export default function Home({ loaderData: d }: Route.ComponentProps) {
 
       {d.user.status === "pending" && (
         <Alert kind="warn">
-          <strong>Your membership is pending.</strong> The club will approve you and set your level shortly. You can browse everything in the meantime.
+          <strong>Your membership is pending.</strong> The club will approve you and set your padel level shortly. You can browse everything in the meantime.
         </Alert>
       )}
       {d.user.status === "active" && d.user.level == null && (
-        <Alert kind="info">Your level hasn't been assessed yet. The club will set it at the next level day, after which you can book sessions.</Alert>
+        <Alert kind="info">Your padel level hasn't been assessed yet. The club will set it at the next level day, after which you can book sessions.</Alert>
       )}
 
       <PushToggle vapidPublicKey={d.vapidPublicKey} />
@@ -115,7 +115,7 @@ export default function Home({ loaderData: d }: Route.ComponentProps) {
       <section>
         <SectionHead title="Events" to="/events" />
         {d.events.length === 0 ? (
-          <Empty title="No events on the calendar yet" body="Fashion show, retreats, drinks… they'll show up here." />
+          <Empty title="No events on the calendar yet" body="Socials, parties, retreats and more will show up here." />
         ) : (
           <div className="grid gap-3 sm:grid-cols-3">
             {d.events.map((e) => (

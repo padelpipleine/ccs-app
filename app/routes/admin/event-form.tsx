@@ -72,7 +72,7 @@ export default function EventForm({ loaderData: d, actionData }: Route.Component
       <PageHeader title={e ? "Edit event" : "New event"} />
       <Form method="post" className="card space-y-4 p-5">
         <Field label="Title">
-          <input name="title" required defaultValue={e?.title ?? ""} className="input" placeholder="World Court Fashion Show" />
+          <input name="title" required defaultValue={e?.title ?? ""} className="input" placeholder="Summer pool party" />
         </Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Category">

@@ -13,7 +13,7 @@ export function Avatar({ name, url, size = 40, className = "" }: { name: string;
 }
 
 export function LevelPill({ level }: { level: number | null | undefined }) {
-  return <span className={`pill ${level == null ? "pill-bone" : "pill-indigo"}`}>Lvl {levelLabel(level)}</span>;
+  return <span className={`pill ${level == null ? "pill-bone" : "pill-indigo"}`}>Padel {levelLabel(level)}</span>;
 }
 
 export function GroupPill({ group }: { group: string }) {

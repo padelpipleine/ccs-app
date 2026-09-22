@@ -61,18 +61,18 @@ export default function Profile({ loaderData: d }: Route.ComponentProps) {
       </div>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
-        <div className="card-ink p-5">
-          <p className="eyebrow text-on-ink-muted">Playing level</p>
-          <p className="serif-num text-4xl text-bone">{u.level?.toFixed(1) ?? "—"}</p>
-          <p className="text-xs text-on-ink-muted">
+        <div className="rounded-2xl bg-indigo p-5 text-white">
+          <p className="eyebrow text-indigo-soft">Padel level</p>
+          <p className="serif-num text-4xl text-white">{u.level?.toFixed(1) ?? "—"}</p>
+          <p className="text-xs text-indigo-soft/80">
             {u.levelAssessedAt ? `Assessed ${formatDate(u.levelAssessedAt.slice(0, 10))}` : "Not yet assessed"} · set by the coach on level day, fixed until the next one.
           </p>
           {d.history.length > 1 && (
-            <p className="mt-2 text-xs text-on-ink-muted">History: {d.history.map((h) => h.level.toFixed(1)).join(" ← ")}</p>
+            <p className="mt-2 text-xs text-indigo-soft/80">History: {d.history.map((h) => h.level.toFixed(1)).join(" ← ")}</p>
           )}
         </div>
-        <div className="card p-5">
-          <p className="eyebrow">Social level</p>
+        <div className="card border-pink-soft bg-pink-soft/40 p-5">
+          <p className="eyebrow text-pink">Club status</p>
           <p className="font-display text-2xl font-semibold text-ink">{sl.current.name}</p>
           <div className="progress mt-2 bg-bone-deep">
             <div style={{ width: `${Math.round(sl.progress * 100)}%` }} />
@@ -118,7 +118,7 @@ export default function Profile({ loaderData: d }: Route.ComponentProps) {
           )}
         </div>
         <div>
-          <h2 className="mb-2 text-lg font-semibold">Points</h2>
+          <h2 className="mb-2 text-lg font-semibold">Club points</h2>
           {d.ledger.length === 0 ? (
             <p className="text-sm text-ink-50">Show up to a session to earn your first points.</p>
           ) : (

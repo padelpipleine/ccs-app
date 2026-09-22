@@ -23,8 +23,8 @@ Admins run the club from the same app.
   capacity with waitlist.
 - **Member perks**: sponsor discounts by category, with codes and how-to-redeem, unlocked for active members.
 - **Members directory** to find partners at your level.
-- **Social ranking**: points for playing, attending events and bringing partners; social levels (Rookie → Icon)
-  and badges. Playing level stays separate and is set only by the coach.
+- **Club status**: club points for playing, attending events and bringing partners; status tiers (Rookie → Icon),
+  badges and a club ranking. The **padel level** is separate and set only by the coach.
 - **Inbox + push notifications** (installable PWA): reminders the day before, partner invites, waitlist promotions,
   new sessions/events/perks, club announcements.
 
