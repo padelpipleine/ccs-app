@@ -153,6 +153,8 @@ export const BADGES: Record<string, { name: string; description: string; icon: s
   three_events: { name: "Social butterfly", description: "Attended 3 club events", icon: "🦋" },
   partner_bringer: { name: "Connector", description: "Brought a partner to a session", icon: "🤝" },
   early_bird: { name: "Early bird", description: "Booked more than a week ahead", icon: "🐦" },
+  streak_4: { name: "On a roll", description: "Played 4 weeks in a row", icon: "🎯" },
+  level_day: { name: "Level day", description: "Assessed by the coach on level day", icon: "📏" },
 };
 
 export const PERK_CATEGORIES = ["restaurant", "bar", "cafe", "spa", "wellness", "shop", "fashion", "wine", "fitness", "other"] as const;

@@ -3,7 +3,7 @@ import { Form, redirect, useNavigation } from "react-router";
 import type { Route } from "./+types/member";
 import { requireAdmin } from "~/lib/auth.server";
 import { getDb, newId, schema } from "~/lib/db.server";
-import { awardPoints } from "~/lib/points.server";
+import { awardBadge, awardPoints } from "~/lib/points.server";
 import { notifyUsers } from "~/lib/push.server";
 import { Alert, Avatar, BackLink, Field, PageHeader, StatusPill } from "~/components/ui";
 import { formatDate, formatDateTime, levelOptions } from "~/lib/format";
@@ -60,6 +60,7 @@ export async function action({ request, context, params }: Route.ActionArgs) {
     if (level != null && level !== member.level) {
       await db.insert(schema.levelHistory).values({ id: newId("lh"), userId: member.id, level, assessedBy: admin.name || admin.email, notes: notes || null });
       await notifyUsers(env, [member.id], { title: `Your padel level is now ${level.toFixed(1)}`, body: notes || "Set by the coach on level day. Fixed until the next assessment.", url: "/profile", kind: "level" });
+      await awardBadge(db, env, member.id, "level_day");
     }
     if (wasPending && status === "active") {
       await notifyUsers(env, [member.id], { title: "You're approved 🎾", body: "Welcome to Crosscourt Social. Book your first hosted session.", url: "/matches", kind: "membership" });
