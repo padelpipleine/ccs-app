@@ -42,7 +42,7 @@ Merging a pull request into `main` deploys live; pushes to other branches upload
 | `RESEND_API_KEY` | **Yes** for real sign-in emails | [resend.com](https://resend.com) → API Keys, and verify your sending domain there. |
 | `EMAIL_FROM` | Yes | e.g. `Crosscourt Social <club@crosscourt.social>` on the verified domain. |
 | `DEV_SHOW_LOGIN_CODE` | Temporary | Set to `1` to show the sign-in code on screen while email isn't configured yet. **Remove before members use it.** |
-| `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | For push | Run `node scripts/generate-vapid.mjs`; subject is `mailto:contact@crosscourt.social`. |
+| `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | For push (free) | Sign in as admin → Dashboard → setup checklist → **Generate push keys**, then paste the three values. (Or run `node scripts/generate-vapid.mjs`.) |
 | `STRIPE_SECRET_KEY` | Optional | Stripe → Developers → API keys. Enables card payments. |
 | `STRIPE_WEBHOOK_SECRET` | Optional | Stripe → Webhooks → endpoint `https://<worker-url>/webhooks/stripe`, event `checkout.session.completed`. |
 

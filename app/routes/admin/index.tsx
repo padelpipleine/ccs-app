@@ -7,6 +7,7 @@ import { PageHeader, Stat, StatusPill } from "~/components/ui";
 import { addDays, formatDate, formatEuro, formatMoney, todayIn } from "~/lib/format";
 import { pushConfigured } from "~/lib/push.server";
 import { stripeEnabled } from "~/lib/payments.server";
+import { VapidGenerator } from "~/components/vapid-generator";
 
 export const meta: Route.MetaFunction = () => [{ title: "Admin · Crosscourt Social" }];
 
@@ -51,7 +52,7 @@ export default function AdminIndex({ loaderData: d }: Route.ComponentProps) {
   const setupItems = [
     [d.setup.secret, "SESSION_SECRET set", "Sign-in cookies are using an insecure dev secret. Set SESSION_SECRET."],
     [d.setup.email, "Email (Resend) configured", "Members can't receive sign-in codes until RESEND_API_KEY is set."],
-    [d.setup.push, "Push notifications configured", "Set VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY to enable push."],
+    [d.setup.push, "Push notifications configured", "Free. Generate a key pair below and add it as Worker secrets."],
     [d.setup.stripe, "Card payments (Stripe)", "Optional. Without it, payments are manual (Bizum/transfer) and you mark them paid."],
   ] as const;
   const missing = setupItems.filter(([ok]) => !ok);
@@ -65,6 +66,7 @@ export default function AdminIndex({ loaderData: d }: Route.ComponentProps) {
             {missing.map(([, label, why]) => (
               <li key={label}>
                 <strong>{label}</strong> — {why}
+                {label === "Push notifications configured" && <VapidGenerator />}
               </li>
             ))}
           </ul>
