@@ -1,9 +1,10 @@
 import { and, count, eq, gte, inArray, sql } from "drizzle-orm";
-import { Link } from "react-router";
+import { Form, Link } from "react-router";
 import type { Route } from "./+types/index";
 import { requireAdmin } from "~/lib/auth.server";
 import { getDb, schema } from "~/lib/db.server";
-import { PageHeader, Stat, StatusPill } from "~/components/ui";
+import { Alert, PageHeader, Stat, StatusPill } from "~/components/ui";
+import { sendEmail } from "~/lib/email.server";
 import { addDays, formatDate, formatEuro, formatMoney, todayIn } from "~/lib/format";
 import { pushConfigured } from "~/lib/push.server";
 import { stripeEnabled } from "~/lib/payments.server";
@@ -11,6 +12,19 @@ import { VapidGenerator } from "~/components/vapid-generator";
 import { siteSyncConfigured } from "~/lib/site-sync.server";
 
 export const meta: Route.MetaFunction = () => [{ title: "Admin · Crosscourt Social" }];
+
+export async function action({ request, context }: Route.ActionArgs) {
+  const env = context.cloudflare.env;
+  const admin = await requireAdmin(request, env);
+  const r = await sendEmail(
+    env,
+    admin.email,
+    "Crosscourt Social · test email",
+    `<p style="font-family:Inter,Segoe UI,system-ui,sans-serif">Email from the Crosscourt Social app is working. Sign-in codes and welcome emails will arrive like this.</p>`,
+    "Email from the Crosscourt Social app is working.",
+  );
+  return { emailTest: { ok: r.ok, detail: r.detail, to: admin.email } };
+}
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   const env = context.cloudflare.env;
@@ -50,10 +64,10 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   };
 }
 
-export default function AdminIndex({ loaderData: d }: Route.ComponentProps) {
+export default function AdminIndex({ loaderData: d, actionData }: Route.ComponentProps) {
   const setupItems = [
     [d.setup.secret, "SESSION_SECRET set", "Sign-in cookies are using an insecure dev secret. Set SESSION_SECRET."],
-    [d.setup.email, "Email (Resend) configured", "Members can't receive sign-in codes until RESEND_API_KEY is set."],
+    [d.setup.email, "Email (Resend) configured", "Members can't receive sign-in codes until RESEND_API_KEY and EMAIL_FROM are set as Secrets on the Worker."],
     [d.setup.push, "Push notifications configured", "Free. Generate a key pair below and add it as Worker secrets."],
     [d.setup.siteSync, "Sync with club.crosscourt.social", "Set SITE_CRM_KEY (the CRM key from the site's wrangler.jsonc) so sign-ups and payments flow into Members automatically every hour."],
     [d.setup.stripe, "Card payments (Stripe)", "Optional. Without it, payments are manual (Bizum/transfer) and you mark them paid."],
@@ -74,6 +88,17 @@ export default function AdminIndex({ loaderData: d }: Route.ComponentProps) {
             ))}
           </ul>
           <p className="mt-1 text-xs">See DEPLOY.md in the repo for the exact commands.</p>
+        </div>
+      )}
+      <Form method="post" className="mb-6 flex flex-wrap items-center gap-3">
+        <button className="btn btn-outline btn-sm">Send me a test email</button>
+        <span className="text-xs text-ink-50">Checks that Resend is set up. Goes to your admin email.</span>
+      </Form>
+      {actionData?.emailTest && (
+        <div className="mb-6">
+          <Alert kind={actionData.emailTest.ok ? "success" : "error"}>
+            {actionData.emailTest.ok ? `Test email sent to ${actionData.emailTest.to}. ${actionData.emailTest.detail}` : `Couldn't send: ${actionData.emailTest.detail}`}
+          </Alert>
         </div>
       )}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
