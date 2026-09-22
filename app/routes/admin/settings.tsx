@@ -64,11 +64,15 @@ export default function Settings({ loaderData: { s, stripe }, actionData }: Rout
         </section>
         <section className="card space-y-4 p-5">
           <h2 className="font-display font-semibold text-ink">Payments</h2>
+          <p className="text-sm text-ink-70">
+            Membership fees are taken on the sign-up site (Airwallex). This is only about the extras inside the app: a second hosted session in a
+            week and event tickets.
+          </p>
           <Field label="How members pay for extras & tickets">
             <select name="paymentMode" defaultValue={s.paymentMode} className="select">
               <option value="manual">Manual (Bizum / transfer, you mark as paid)</option>
               <option value="stripe" disabled={!stripe}>
-                Card via Stripe {stripe ? "" : "(add STRIPE_SECRET_KEY to enable)"}
+                Card in the app via Stripe {stripe ? "" : "(optional; needs the STRIPE_SECRET_KEY secret)"}
               </option>
             </select>
           </Field>
