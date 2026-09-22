@@ -1,6 +1,6 @@
 import { and, count, eq, gte, inArray, sql } from "drizzle-orm";
 import { schema, type Db } from "./db.server";
-import { ACTIVE_STATUSES, capacity, eligibility } from "./bookings.server";
+import { ACTIVE_STATUSES, capacity, eligibility, groupEligible } from "./bookings.server";
 import type { Settings } from "./settings.server";
 import { todayIn } from "./format";
 import type { MatchCardData, EventCardData } from "~/components/cards";
@@ -16,8 +16,10 @@ export async function upcomingMatches(db: Db, user: User, settings: Settings, op
     .where(and(gte(schema.matchDays.date, today), inArray(schema.matchDays.status, ["open", "cancelled"])))
     .orderBy(schema.matchDays.date, schema.matchDays.startTime)
     .limit(opts.limit ?? 60);
-  if (matches.length === 0) return [];
-  const ids = matches.map((m) => m.match.id);
+  // Members only ever see sessions for groups they belong to (men never see ladies sessions).
+  const visible = matches.filter((m) => groupEligible(user, m.match.group));
+  if (visible.length === 0) return [];
+  const ids = visible.map((m) => m.match.id);
   const counts = await db
     .select({ matchDayId: schema.bookings.matchDayId, n: count() })
     .from(schema.bookings)
@@ -29,7 +31,7 @@ export async function upcomingMatches(db: Db, user: User, settings: Settings, op
     .where(and(inArray(schema.bookings.matchDayId, ids), eq(schema.bookings.userId, user.id), inArray(schema.bookings.status, ["booked", "invited", "waitlist"])));
   const countMap = new Map(counts.map((c) => [c.matchDayId, c.n]));
   const mineMap = new Map(mine.map((m) => [m.matchDayId, m.status]));
-  const out = matches.map(({ match, venueName }) => {
+  const out = visible.map(({ match, venueName }) => {
     const elig = eligibility(user, match, settings, today);
     return {
       ...match,
@@ -65,6 +67,6 @@ export async function upcomingEvents(db: Db, user: User, opts: { limit?: number 
   const countMap = new Map(counts.map((c) => [c.eventId, Number(c.n)]));
   const mineMap = new Map(mine.map((m) => [m.eventId, m.status]));
   return rows
-    .filter((e) => e.group === "all" || (e.group === "female" ? user.gender === "female" || user.memberType === "female" : user.memberType === "mixed"))
+    .filter((e) => groupEligible(user, e.group))
     .map((e) => ({ ...e, going: countMap.get(e.id) ?? 0, myStatus: mineMap.get(e.id) ?? null }));
 }

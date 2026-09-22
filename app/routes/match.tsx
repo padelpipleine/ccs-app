@@ -4,7 +4,7 @@ import type { Route } from "./+types/match";
 import { requireActiveMember } from "~/lib/auth.server";
 import { getDb, schema } from "~/lib/db.server";
 import { getSettings, num } from "~/lib/settings.server";
-import { acceptInvite, cancelBooking, capacity, createBooking, eligibility, matchWithBookings, partnerEligibility, pricing } from "~/lib/bookings.server";
+import { acceptInvite, cancelBooking, capacity, createBooking, eligibility, groupEligible, matchWithBookings, partnerEligibility, pricing } from "~/lib/bookings.server";
 import { formatDateLong, formatMoney, levelLabel } from "~/lib/format";
 import { Alert, Avatar, BackLink, GroupPill, LevelPill, StatusPill } from "~/components/ui";
 import { Icons } from "~/components/icons";
@@ -17,6 +17,7 @@ export async function loader({ request, context, params }: Route.LoaderArgs) {
   const db = getDb(env);
   const data = await matchWithBookings(db, params.id);
   if (!data) throw new Response("Not found", { status: 404 });
+  if (!groupEligible(user, data.match.group)) throw redirect("/matches");
   const settings = await getSettings(db);
   const { match, venue, rows } = data;
   const active = rows.filter((r) => ["booked", "invited", "attended"].includes(r.booking.status));
@@ -66,6 +67,7 @@ export async function action({ request, context, params }: Route.ActionArgs) {
   const intent = String(form.get("intent"));
   const match = await db.select().from(schema.matchDays).where(eq(schema.matchDays.id, params.id)).get();
   if (!match) throw new Response("Not found", { status: 404 });
+  if (!groupEligible(user, match.group)) throw redirect("/matches");
 
   if (intent === "book") {
     const partnerId = String(form.get("partnerId") ?? "");

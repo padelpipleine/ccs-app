@@ -3,6 +3,7 @@ import { requireActiveMember } from "~/lib/auth.server";
 import { getDb } from "~/lib/db.server";
 import { getSettings } from "~/lib/settings.server";
 import { upcomingMatches } from "~/lib/queries.server";
+import { groupEligible } from "~/lib/bookings.server";
 import { MatchCard } from "~/components/cards";
 import { Empty, PageHeader } from "~/components/ui";
 import { Link, useSearchParams } from "react-router";
@@ -15,7 +16,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   const db = getDb(env);
   const settings = await getSettings(db);
   const matches = await upcomingMatches(db, user, settings);
-  return { matches, memberType: user.memberType, gender: user.gender };
+  return { matches, canSeeMixed: groupEligible(user, "mixed"), canSeeLadies: groupEligible(user, "female") };
 }
 
 export default function Matches({ loaderData }: Route.ComponentProps) {
@@ -32,8 +33,7 @@ export default function Matches({ loaderData }: Route.ComponentProps) {
     ["all", "All"],
     ["eligible", "For me"],
     ["mine", "Booked"],
-    ["mixed", "Mixed"],
-    ["female", "Ladies"],
+    ...(loaderData.canSeeMixed && loaderData.canSeeLadies ? [["mixed", "Mixed"], ["female", "Ladies"]] : []),
   ];
   return (
     <div>

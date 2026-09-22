@@ -8,6 +8,7 @@ import { formatDateLong, formatMoney } from "~/lib/format";
 import { Alert, Avatar, BackLink, GroupPill, StatusPill } from "~/components/ui";
 import { Icons } from "~/components/icons";
 import { notifyUsers } from "~/lib/push.server";
+import { groupEligible } from "~/lib/bookings.server";
 
 export const meta: Route.MetaFunction = ({ data }) => [{ title: `${data?.event.title ?? "Event"} · Crosscourt Social` }];
 
@@ -31,6 +32,7 @@ export async function loader({ request, context, params }: Route.LoaderArgs) {
   const env = context.cloudflare.env;
   const user = await requireActiveMember(request, env);
   const { db, event, going, headcount, mine } = await load(env, params.id, user.id);
+  if (!groupEligible(user, event.group)) throw redirect("/events");
   const settings = await getSettings(db);
   return {
     event,
@@ -38,7 +40,7 @@ export async function loader({ request, context, params }: Route.LoaderArgs) {
     headcount,
     mine: mine?.reg ?? null,
     spotsLeft: event.capacity != null ? event.capacity - headcount : null,
-    canJoin: user.status === "active" && event.status === "open" && (event.group === "all" || (event.group === "female" ? user.gender === "female" || user.memberType === "female" : user.memberType === "mixed")),
+    canJoin: user.status === "active" && event.status === "open",
     paymentInstructions: settings.paymentInstructions,
   };
 }
@@ -47,6 +49,7 @@ export async function action({ request, context, params }: Route.ActionArgs) {
   const env = context.cloudflare.env;
   const user = await requireActiveMember(request, env);
   const { db, event, headcount, mine } = await load(env, params.id, user.id);
+  if (!groupEligible(user, event.group)) throw redirect("/events");
   const form = await request.formData();
   const intent = String(form.get("intent"));
 
