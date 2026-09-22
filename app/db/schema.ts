@@ -42,6 +42,7 @@ export const users = sqliteTable(
     photoConsent: text("photo_consent", { enum: ["yes", "no"] }),
     onboardingNotes: text("onboarding_notes"),
     onboardedAt: text("onboarded_at"), // set when the member completes the in-app profile questions
+    welcomeEmailAt: text("welcome_email_at"), // the one welcome email with a sign-in link, sent once
     siteSyncedAt: text("site_synced_at"),
     lastSeenAt: text("last_seen_at"),
     createdAt: text("created_at").notNull().default(now),

@@ -157,15 +157,24 @@ export async function syncFromSite(env: Env, origin: string): Promise<SyncResult
   // Welcome newly active members by email when email is configured; otherwise admins send a WhatsApp link.
   if (env.RESEND_API_KEY) {
     for (const u of newlyActive) {
-      if (await sendWelcomeEmail(env, origin, u.email, u.name)) result.invited++;
+      if (await sendWelcomeEmail(env, origin, u.id, u.email, u.name)) result.invited++;
     }
   }
   await notifyAdminsOfNewMembers(env, newlyActive);
   return result;
 }
 
-export async function sendWelcomeEmail(env: Env, origin: string, email: string, name: string): Promise<boolean> {
-  const link = await createLoginLink(env, origin, email);
+/**
+ * The one welcome email: "your app is ready" with a one-time sign-in link. Sent at most once per
+ * member (welcomeEmailAt). Pass `link` to reuse a link already handed to the member (creating a
+ * new one would invalidate it).
+ */
+export async function sendWelcomeEmail(env: Env, origin: string, userId: string, email: string, name: string, link?: string): Promise<boolean> {
+  if (!env.RESEND_API_KEY) return false;
+  const db = getDb(env);
+  const row = await db.select({ welcomeEmailAt: schema.users.welcomeEmailAt }).from(schema.users).where(eq(schema.users.id, userId)).get();
+  if (row?.welcomeEmailAt) return false;
+  link ??= await createLoginLink(env, origin, email);
   const first = name.split(" ")[0] || "there";
   const r = await sendEmail(
     env,
@@ -180,6 +189,7 @@ export async function sendWelcomeEmail(env: Env, origin: string, email: string, 
     </div>`,
     `Hola ${first}, your Crosscourt Social app is ready. Open it here (works once, valid 7 days): ${link}`,
   );
+  if (r.ok) await db.update(schema.users).set({ welcomeEmailAt: new Date().toISOString() }).where(eq(schema.users.id, userId));
   return r.ok;
 }
 
@@ -218,5 +228,8 @@ export async function handleSiteSignup(request: Request, env: Env): Promise<Resp
   const origin = (env.APP_URL || new URL(request.url).origin).replace(/\/$/, "");
   const loginUrl = await createLoginLink(env, origin, r.email);
   if (r.activated) await notifyAdminsOfNewMembers(env, [{ id: r.userId, email: r.email, name: r.name }]);
-  return Response.json({ ok: true, loginUrl, created: r.created, activated: r.activated });
+  // Welcome email straight after payment, with the same link as the button on the site's success screen.
+  const status = (await getDb(env).select({ status: schema.users.status }).from(schema.users).where(eq(schema.users.id, r.userId)).get())?.status;
+  const emailed = status === "active" ? await sendWelcomeEmail(env, origin, r.userId, r.email, r.name, loginUrl) : false;
+  return Response.json({ ok: true, loginUrl, created: r.created, activated: r.activated, emailed });
 }
