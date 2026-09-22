@@ -9,7 +9,7 @@ export const profileSchema = z.object({
   playStyle: z.enum(["defensive", "attacking", "all_round", "social"]).optional().or(z.literal("")),
   bio: z.string().trim().max(300).optional().or(z.literal("")),
   instagram: z.string().trim().max(60).optional().or(z.literal("")),
-  avatarUrl: z.string().trim().url().max(500).optional().or(z.literal("")),
+  avatarUrl: z.string().trim().max(500).regex(/^(\/photos\/[\w\/.-]+|https?:\/\/.+)?$/, "Invalid photo").optional().or(z.literal("")),
   showInDirectory: z.enum(["on"]).optional(),
   selfLevel: z.enum(["beginner", "improver", "intermediate", "advanced", "competition"]).optional().or(z.literal("")),
   sessionPref: z.enum(["ladies", "mixed", "both"]).optional().or(z.literal("")),

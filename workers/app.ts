@@ -3,6 +3,7 @@ import { runScheduledJobs } from "../app/lib/jobs.server";
 import { handleStripeWebhook } from "../app/lib/payments.server";
 import { ensureMigrated } from "../app/lib/migrate.server";
 import { handleSiteSignup } from "../app/lib/site-sync.server";
+import { servePhoto } from "../app/lib/photos.server";
 
 declare module "react-router" {
   export interface AppLoadContext {
@@ -28,6 +29,9 @@ export default {
     }
     if (url.pathname === "/webhooks/site-signup" && request.method === "POST") {
       return handleSiteSignup(request, env);
+    }
+    if (url.pathname.startsWith("/photos/") && request.method === "GET") {
+      return servePhoto(url.pathname.slice("/photos/".length), env);
     }
     return requestHandler(request, { cloudflare: { env, ctx } });
   },

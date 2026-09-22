@@ -10,8 +10,8 @@ Admins run the club from the same app.
 
 ### Members
 - **Sign in with an emailed code**, no passwords. New sign-ups land as *pending* until an admin approves them.
-- **Player profile**: gender, handedness, preferred side, playing style, bio, Instagram, photo. Opt in/out of the
-  member directory.
+- **Player profile**: photo (camera or camera roll, stored in R2), gender, handedness, preferred side, playing
+  style, bio, Instagram. Opt in/out of the member directory.
 - **Play**: browse upcoming hosted sessions filtered by group (ladies / mixed), level range and eligibility.
   Book a spot, or **bring a partner** – only members within the allowed level gap are offered. The partner gets a
   notification and confirms. Full sessions have a **waitlist** that promotes automatically.

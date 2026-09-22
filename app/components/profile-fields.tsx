@@ -1,9 +1,11 @@
 import { Field } from "./ui";
+import { PhotoPicker } from "./photo-picker";
 import type { User } from "~/db/schema";
 
 export function ProfileFields({ user, onboarding = false }: { user: Partial<User>; onboarding?: boolean }) {
   return (
     <>
+      <PhotoPicker name="avatarUrl" initialUrl={user.avatarUrl ?? null} displayName={user.name ?? ""} />
       <Field label="Full name">
         <input name="name" required defaultValue={user.name ?? ""} className="input" autoComplete="name" />
       </Field>
@@ -71,14 +73,9 @@ export function ProfileFields({ user, onboarding = false }: { user: Partial<User
       <Field label="A line about you" hint="Optional. Shown on your profile.">
         <textarea name="bio" rows={2} maxLength={300} defaultValue={user.bio ?? ""} className="textarea" placeholder="Moved to Palma last year, play twice a week, always up for a drink after." />
       </Field>
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="Instagram">
-          <input name="instagram" defaultValue={user.instagram ?? ""} className="input" placeholder="@handle" />
-        </Field>
-        <Field label="Photo URL" hint="Link to a photo, optional.">
-          <input name="avatarUrl" type="url" defaultValue={user.avatarUrl ?? ""} className="input" placeholder="https://…" />
-        </Field>
-      </div>
+      <Field label="Instagram">
+        <input name="instagram" defaultValue={user.instagram ?? ""} className="input" placeholder="@handle" />
+      </Field>
       <div className="grid grid-cols-2 gap-3">
         <Field label="Fancy leading the club somewhere?" hint="We're growing city by city, run by local ambassadors.">
           <select name="ambassador" defaultValue={user.ambassador ?? ""} className="select">
