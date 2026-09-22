@@ -8,6 +8,7 @@ import { addDays, formatDate, formatEuro, formatMoney, todayIn } from "~/lib/for
 import { pushConfigured } from "~/lib/push.server";
 import { stripeEnabled } from "~/lib/payments.server";
 import { VapidGenerator } from "~/components/vapid-generator";
+import { siteSyncConfigured } from "~/lib/site-sync.server";
 
 export const meta: Route.MetaFunction = () => [{ title: "Admin · Crosscourt Social" }];
 
@@ -43,6 +44,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
       email: Boolean(env.RESEND_API_KEY),
       stripe: stripeEnabled(env),
       secret: Boolean(env.SESSION_SECRET),
+      siteSync: siteSyncConfigured(env),
     },
     weekEnd: addDays(today, 7),
   };
@@ -53,6 +55,7 @@ export default function AdminIndex({ loaderData: d }: Route.ComponentProps) {
     [d.setup.secret, "SESSION_SECRET set", "Sign-in cookies are using an insecure dev secret. Set SESSION_SECRET."],
     [d.setup.email, "Email (Resend) configured", "Members can't receive sign-in codes until RESEND_API_KEY is set."],
     [d.setup.push, "Push notifications configured", "Free. Generate a key pair below and add it as Worker secrets."],
+    [d.setup.siteSync, "Sync with club.crosscourt.social", "Set SITE_CRM_KEY (the CRM key from the site's wrangler.jsonc) so sign-ups and payments flow into Members automatically every hour."],
     [d.setup.stripe, "Card payments (Stripe)", "Optional. Without it, payments are manual (Bizum/transfer) and you mark them paid."],
   ] as const;
   const missing = setupItems.filter(([ok]) => !ok);

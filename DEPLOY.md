@@ -43,6 +43,7 @@ Merging a pull request into `main` deploys live; pushes to other branches upload
 | `EMAIL_FROM` | Yes | e.g. `Crosscourt Social <club@crosscourt.social>` on the verified domain. |
 | `DEV_SHOW_LOGIN_CODE` | Temporary | Set to `1` to show the sign-in code on screen while email isn't configured yet. **Remove before members use it.** |
 | `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | For push (free) | Sign in as admin → Dashboard → setup checklist → **Generate push keys**, then paste the three values. (Or run `node scripts/generate-vapid.mjs`.) |
+| `SITE_CRM_KEY` | Recommended | The `CRM_KEY` value from the sign-up site's `club/wrangler.jsonc` (repo `padelpipleine/crosscourtsocial`). Lets the app pull sign-ups and payment status from club.crosscourt.social every hour, and on demand from Admin → Members → "Sync from club site". |
 | `STRIPE_SECRET_KEY` | Optional | Stripe → Developers → API keys. Enables card payments. |
 | `STRIPE_WEBHOOK_SECRET` | Optional | Stripe → Webhooks → endpoint `https://<worker-url>/webhooks/stripe`, event `checkout.session.completed`. |
 
@@ -67,7 +68,23 @@ then uncomment the `push:` trigger. Don't enable both methods.
 Dashboard → the Worker → Settings → Domains & Routes → Add → Custom domain, e.g. `app.crosscourt.social`.
 Push notifications and the PWA "Add to Home Screen" need HTTPS, which Cloudflare provides automatically.
 
-## 5. Day-to-day
+## 5. How members get in
+
+1. Someone joins on **club.crosscourt.social** (Airwallex payment) and fills the welcome form there.
+2. Within the hour (or when an admin clicks **Sync from club site**), they appear in the app's Members list:
+   *paid* → **active**, *started* (began checkout) → **pending**, *lapsed* → **paused**. Their name, phone, gender,
+   hand, side, Instagram and self-declared level come across; the coach still sets the real padel level.
+3. Admins get an in-app notification listing new members. If Resend is configured, each new active member is
+   emailed a one-time sign-in link automatically; otherwise open the member and use **Send via WhatsApp**.
+4. **Straight after paying**, the site asks the app for a one-time sign-in link (`POST /webhooks/site-signup`,
+   authenticated with the shared key) and sends the member into the app's onboarding questions, signed in with the
+   email they paid with. The site's `/welcome` links in older emails redirect there too.
+5. The app never changes anything on the site, and never overwrites data an admin or member has edited in the app.
+
+The shared key must be identical on both Workers: `CRM_KEY` in the site's `club/wrangler.jsonc` and the
+`SITE_CRM_KEY` secret here. The site's `APP_URL` var must point at this app.
+
+## 6. Day-to-day
 
 - **Logs:** dashboard → Worker → Observability (enabled in `wrangler.jsonc`), or `npx wrangler tail`.
 - **Database:** `npx wrangler d1 execute ccs-db --remote --command "select count(*) from users"`.

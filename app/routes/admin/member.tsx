@@ -1,7 +1,7 @@
 import { desc, eq } from "drizzle-orm";
 import { Form, redirect, useNavigation } from "react-router";
 import type { Route } from "./+types/member";
-import { requireAdmin } from "~/lib/auth.server";
+import { createLoginLink, requireAdmin } from "~/lib/auth.server";
 import { getDb, newId, schema } from "~/lib/db.server";
 import { awardBadge, awardPoints } from "~/lib/points.server";
 import { notifyUsers } from "~/lib/push.server";
@@ -74,6 +74,10 @@ export async function action({ request, context, params }: Route.ActionArgs) {
     await awardPoints(db, member.id, pts, reason, "admin", admin.id);
     return { success: `${pts > 0 ? "+" : ""}${pts} points applied.` };
   }
+  if (intent === "login_link") {
+    const link = await createLoginLink(env, new URL(request.url).origin, member.email);
+    return { loginLink: link };
+  }
   if (intent === "delete") {
     await db.delete(schema.users).where(eq(schema.users.id, member.id));
     throw redirect("/admin/members");
@@ -87,7 +91,11 @@ export default function AdminMember({ loaderData: d, actionData }: Route.Compone
   return (
     <div className="mx-auto max-w-3xl">
       <BackLink to="/admin/members">Members</BackLink>
-      <PageHeader title={m.name || m.email} subtitle={m.email} action={<StatusPill status={m.status} />} />
+      <PageHeader
+        title={m.name || m.email}
+        subtitle={`${m.email}${m.siteStatus ? ` · club site: ${m.siteStatus}${m.membershipPlan ? ` (${m.membershipPlan})` : ""}` : ""}`}
+        action={<StatusPill status={m.status} />}
+      />
       {actionData?.error && <Alert kind="error">{actionData.error}</Alert>}
       {actionData?.success && <Alert kind="success">{actionData.success}</Alert>}
       <div className="grid gap-6 lg:grid-cols-5">
@@ -96,9 +104,18 @@ export default function AdminMember({ loaderData: d, actionData }: Route.Compone
             <Avatar name={m.name || m.email} url={m.avatarUrl} size={48} />
             <div className="text-sm text-ink-70">
               {m.gender ?? "gender not set"} · {m.handedness ?? "hand ?"} · {m.preferredSide ?? "side ?"} · {m.playStyle ?? "style ?"}
+              {m.sessionPref && ` · wants ${m.sessionPref}`}
               <br />
               {m.phone && <span>{m.phone} · </span>}
               {m.instagram}
+              {(m.ambassador || m.photoConsent) && (
+                <span className="block text-xs text-ink-50">
+                  {m.ambassador && `Ambassador: ${m.ambassador}`}
+                  {m.ambassador && m.photoConsent && " · "}
+                  {m.photoConsent && `Photos: ${m.photoConsent}`}
+                </span>
+              )}
+              {m.onboardingNotes && <span className="block text-xs text-ink-50">“{m.onboardingNotes}”</span>}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -118,7 +135,7 @@ export default function AdminMember({ loaderData: d, actionData }: Route.Compone
             </Field>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Padel level" hint="Set on level day by the coach.">
+            <Field label="Padel level" hint={m.selfLevel ? `Self-declared on sign-up: ${m.selfLevel}. Set the real level on level day.` : "Set on level day by the coach."}>
               <select name="level" defaultValue={m.level ?? ""} className="select">
                 <option value="">Not assessed</option>
                 {levelOptions().map((l) => (
@@ -165,6 +182,17 @@ export default function AdminMember({ loaderData: d, actionData }: Route.Compone
               Apply
             </button>
           </Form>
+          <Form method="post" className="card space-y-2 p-4">
+            <p className="font-display font-semibold text-ink">Sign-in link</p>
+            <p className="text-xs text-ink-50">A one-time link that signs {m.name.split(" ")[0] || "the member"} in without an email code. Valid 7 days. Handy for WhatsApp.</p>
+            {actionData && "loginLink" in actionData && actionData.loginLink ? (
+              <LoginLinkBox link={actionData.loginLink} name={m.name} phone={m.phone} />
+            ) : (
+              <button name="intent" value="login_link" className="btn btn-outline btn-sm">
+                Create sign-in link
+              </button>
+            )}
+          </Form>
           <div className="card p-4">
             <p className="font-display font-semibold text-ink">Level history</p>
             {d.history.length === 0 ? (
@@ -204,6 +232,26 @@ export default function AdminMember({ loaderData: d, actionData }: Route.Compone
           </Form>
         </div>
       </div>
+    </div>
+  );
+}
+
+function LoginLinkBox({ link, name, phone }: { link: string; name: string; phone: string | null }) {
+  const first = name.split(" ")[0] || "there";
+  const text = `Hi ${first}! Here's your sign-in link for the Crosscourt Social app (works once, valid 7 days): ${link}`;
+  const wa = phone ? `https://wa.me/${phone.replace(/[^\d]/g, "")}?text=${encodeURIComponent(text)}` : `https://wa.me/?text=${encodeURIComponent(text)}`;
+  return (
+    <div className="space-y-2">
+      <input readOnly value={link} className="input font-mono text-xs" onFocus={(e) => e.currentTarget.select()} />
+      <div className="flex flex-wrap gap-2">
+        <button type="button" className="btn btn-ghost btn-sm" onClick={() => navigator.clipboard.writeText(link)}>
+          Copy link
+        </button>
+        <a href={wa} target="_blank" rel="noreferrer" className="btn btn-primary btn-sm">
+          Send via WhatsApp
+        </a>
+      </div>
+      <p className="hint">Creating a new link cancels this one.</p>
     </div>
   );
 }

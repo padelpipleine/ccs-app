@@ -1,7 +1,7 @@
 import { Field } from "./ui";
 import type { User } from "~/db/schema";
 
-export function ProfileFields({ user }: { user: Partial<User> }) {
+export function ProfileFields({ user, onboarding = false }: { user: Partial<User>; onboarding?: boolean }) {
   return (
     <>
       <Field label="Full name">
@@ -39,6 +39,26 @@ export function ProfileFields({ user }: { user: Partial<User> }) {
           </select>
         </Field>
       </div>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Your level, roughly" hint="The coach sets your real padel level on level day.">
+          <select name="selfLevel" defaultValue={user.selfLevel ?? ""} className="select">
+            <option value="">—</option>
+            <option value="beginner">Beginner</option>
+            <option value="improver">Improver</option>
+            <option value="intermediate">Intermediate</option>
+            <option value="advanced">Advanced</option>
+            <option value="competition">Competition</option>
+          </select>
+        </Field>
+        <Field label="Which sessions?" hint="Men play in the mixed sessions.">
+          <select name="sessionPref" defaultValue={user.sessionPref ?? ""} className="select">
+            <option value="">—</option>
+            <option value="ladies">Ladies</option>
+            <option value="mixed">Mixed</option>
+            <option value="both">Both</option>
+          </select>
+        </Field>
+      </div>
       <Field label="Type of player">
         <select name="playStyle" defaultValue={user.playStyle ?? ""} className="select">
           <option value="">—</option>
@@ -59,6 +79,28 @@ export function ProfileFields({ user }: { user: Partial<User> }) {
           <input name="avatarUrl" type="url" defaultValue={user.avatarUrl ?? ""} className="input" placeholder="https://…" />
         </Field>
       </div>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Fancy leading the club somewhere?" hint="We're growing city by city, run by local ambassadors.">
+          <select name="ambassador" defaultValue={user.ambassador ?? ""} className="select">
+            <option value="">—</option>
+            <option value="yes">Yes, tell me more</option>
+            <option value="maybe">Maybe</option>
+            <option value="no">Not for me</option>
+          </select>
+        </Field>
+        <Field label="Photos & videos" hint="We shoot content at sessions and events.">
+          <select name="photoConsent" defaultValue={user.photoConsent ?? ""} className="select">
+            <option value="">—</option>
+            <option value="yes">Fine to feature me</option>
+            <option value="no">Rather not</option>
+          </select>
+        </Field>
+      </div>
+      {onboarding && (
+        <Field label="Anything else?" hint="Injuries, who you like playing with, days that work…">
+          <textarea name="onboardingNotes" rows={2} maxLength={1000} defaultValue={user.onboardingNotes ?? ""} className="textarea" />
+        </Field>
+      )}
       <label className="flex items-center gap-2 text-sm text-ink-70">
         <input type="checkbox" name="showInDirectory" defaultChecked={user.showInDirectory ?? true} className="h-4 w-4 accent-indigo" />
         Show me in the member directory so others can find a partner

@@ -1,6 +1,6 @@
 import { Form, Link, redirect, useNavigation } from "react-router";
 import type { Route } from "./+types/login-verify";
-import { completeLogin } from "~/lib/auth.server";
+import { completeLogin, needsOnboarding } from "~/lib/auth.server";
 import { Alert, Field } from "~/components/ui";
 import { AuthFrame } from "./login";
 
@@ -20,7 +20,7 @@ export async function action({ request, context }: Route.ActionArgs) {
   const next = String(form.get("next") ?? "/");
   const result = await completeLogin(context.cloudflare.env, request, email, code);
   if (!result.ok) return { error: result.error };
-  const target = !result.user.name ? "/onboarding" : next.startsWith("/") ? next : "/";
+  const target = needsOnboarding(result.user) ? "/onboarding" : next.startsWith("/") ? next : "/";
   throw redirect(target, { headers: result.headers });
 }
 
@@ -37,7 +37,7 @@ export default function Verify({ loaderData, actionData }: Route.ComponentProps)
           Dev mode, email not configured. Your code is <strong>{loaderData.dev}</strong>.
         </Alert>
       )}
-      {loaderData.nomail && <Alert kind="error">Email sending isn't configured yet. Ask the club admin to set RESEND_API_KEY.</Alert>}
+      {loaderData.nomail && <Alert kind="error">We couldn't email your code right now. Ask the club to send you a sign-in link on WhatsApp instead.</Alert>}
       <Form method="post" className="mt-6 space-y-4">
         <input type="hidden" name="email" value={loaderData.email} />
         <input type="hidden" name="next" value={loaderData.next} />

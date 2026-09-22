@@ -42,6 +42,11 @@ Admins run the club from the same app.
   allowance, extra price, partner level gap, cancellation window, booking window, payment mode and instructions,
   points values, welcome message, WhatsApp link).
 
+### Sign-up site sync
+Members join and pay on club.crosscourt.social (a separate Worker with its own CRM). The app pulls that CRM every hour
+and on demand: paid → active, started → pending, lapsed → paused, profile fields fill blanks only, and new active
+members get a welcome email with a one-time sign-in link when Resend is configured. See DEPLOY.md.
+
 ### Automatic (hourly cron)
 Reminders for tomorrow's sessions and events, expiry of partner invites not accepted within 48 h (spot goes to
 the waitlist), closing of past sessions.

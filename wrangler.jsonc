@@ -21,6 +21,10 @@
   "vars": {
     "APP_NAME": "Crosscourt Social",
     "TIMEZONE": "Europe/Madrid",
+    // Public URL of this app, used for links in emails sent by the hourly job.
+    "APP_URL": "https://ccs-app.plain-sound-433d.workers.dev",
+    // The sign-up site whose CRM we sync members from (pair with the SITE_CRM_KEY secret).
+    "SITE_URL": "https://club.crosscourt.social",
     // Comma-separated list of emails that are admins automatically.
     "ADMIN_EMAILS": "hi@jgmetzger.com"
   }

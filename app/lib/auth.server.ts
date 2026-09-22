@@ -44,6 +44,28 @@ export function isAdminEmail(env: Env, email: string) {
     .includes(email.toLowerCase());
 }
 
+export function devCodeEnabled(env: Env) {
+  return ["1", "true", "yes", "on"].includes((env.DEV_SHOW_LOGIN_CODE ?? "").trim().toLowerCase());
+}
+
+const LINK_DAYS = 7;
+
+/**
+ * Creates a one-time sign-in link for a member (valid 7 days), for admins to send by WhatsApp
+ * when email isn't available. Replaces any pending code for that email.
+ */
+export async function createLoginLink(env: Env, origin: string, rawEmail: string): Promise<string> {
+  const db = getDb(env);
+  const email = normalizeEmail(rawEmail);
+  const bytes = new Uint8Array(24);
+  crypto.getRandomValues(bytes);
+  const token = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+  const expiresAt = new Date(Date.now() + LINK_DAYS * 86400_000).toISOString();
+  await db.delete(schema.loginCodes).where(eq(schema.loginCodes.email, email));
+  await db.insert(schema.loginCodes).values({ id: newId("lc"), email, codeHash: await sha256(`${email}:${token}`), expiresAt });
+  return `${origin}/login/link?${new URLSearchParams({ email, token })}`;
+}
+
 /** Step 1: create and email a 6-digit code. Returns the code only when DEV_SHOW_LOGIN_CODE is set. */
 export async function startLogin(env: Env, rawEmail: string): Promise<{ devCode?: string; emailSent: boolean }> {
   const db = getDb(env);
@@ -54,7 +76,7 @@ export async function startLogin(env: Env, rawEmail: string): Promise<{ devCode?
   await db.insert(schema.loginCodes).values({ id: newId("lc"), email, codeHash: await sha256(`${email}:${code}`), expiresAt });
   const { html, text } = loginCodeEmail(code, env.APP_NAME);
   const result = await sendEmail(env, email, `${code} is your ${env.APP_NAME} code`, html, text);
-  const showDev = env.DEV_SHOW_LOGIN_CODE === "1" || (!env.RESEND_API_KEY && import.meta.env.DEV);
+  const showDev = devCodeEnabled(env) || (!env.RESEND_API_KEY && import.meta.env.DEV);
   return { devCode: showDev ? code : undefined, emailSent: result.ok };
 }
 
@@ -137,10 +159,14 @@ export async function requireUser(request: Request, env: Env): Promise<User> {
   return user;
 }
 
-/** Member with a completed profile and active status. */
+export function needsOnboarding(user: Pick<User, "name" | "onboardedAt">) {
+  return !user.name || !user.onboardedAt;
+}
+
+/** Member who has completed the in-app profile questions. */
 export async function requireActiveMember(request: Request, env: Env): Promise<User> {
   const user = await requireUser(request, env);
-  if (!user.name) throw redirect("/onboarding");
+  if (needsOnboarding(user)) throw redirect("/onboarding");
   return user;
 }
 

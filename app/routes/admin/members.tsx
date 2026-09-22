@@ -4,6 +4,7 @@ import type { Route } from "./+types/members";
 import { requireAdmin } from "~/lib/auth.server";
 import { getDb, newId, schema } from "~/lib/db.server";
 import { normalizeEmail } from "~/lib/auth.server";
+import { siteSyncConfigured, syncFromSite } from "~/lib/site-sync.server";
 import { Alert, Avatar, GroupPill, LevelPill, PageHeader, StatusPill } from "~/components/ui";
 import { formatDate } from "~/lib/format";
 
@@ -13,7 +14,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   const env = context.cloudflare.env;
   await requireAdmin(request, env);
   const members = await getDb(env).select().from(schema.users).orderBy(desc(schema.users.createdAt));
-  return { members };
+  return { members, siteSync: siteSyncConfigured(env) };
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
@@ -21,6 +22,15 @@ export async function action({ request, context }: Route.ActionArgs) {
   await requireAdmin(request, env);
   const db = getDb(env);
   const form = await request.formData();
+  if (form.get("intent") === "sync") {
+    if (!siteSyncConfigured(env)) return { sync: null, error: "Add the SITE_CRM_KEY secret to enable syncing from the club site." };
+    try {
+      const r = await syncFromSite(env, new URL(request.url).origin);
+      return { sync: r };
+    } catch (err) {
+      return { sync: null, error: `Sync failed: ${err instanceof Error ? err.message : String(err)}` };
+    }
+  }
   const raw = String(form.get("bulk") ?? "");
   const lines = raw
     .split(/\n/)
@@ -30,23 +40,27 @@ export async function action({ request, context }: Route.ActionArgs) {
   const skipped: string[] = [];
   const existing = new Set((await db.select({ email: schema.users.email }).from(schema.users)).map((u) => u.email));
   for (const line of lines) {
-    const [emailRaw, nameRaw, typeRaw] = line.split(/[,;\t]/).map((s) => s?.trim() ?? "");
+    const [emailRaw, nameRaw, typeRaw, phoneRaw, genderRaw] = line.split(/[,;\t]/).map((s) => s?.trim() ?? "");
     const email = normalizeEmail(emailRaw ?? "");
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || existing.has(email)) {
       skipped.push(line);
       continue;
     }
+    const g = (genderRaw ?? "").toLowerCase();
+    const gender = g.startsWith("f") || g === "w" ? "female" : g.startsWith("m") ? "male" : null;
     await db.insert(schema.users).values({
       id: newId("u"),
       email,
       name: nameRaw ?? "",
+      phone: phoneRaw || null,
+      gender,
       status: "active",
-      memberType: typeRaw?.toLowerCase().startsWith("f") || typeRaw?.toLowerCase().startsWith("l") ? "female" : "mixed",
+      memberType: gender === "male" ? "mixed" : typeRaw?.toLowerCase().startsWith("f") || typeRaw?.toLowerCase().startsWith("l") ? "female" : "mixed",
     });
     existing.add(email);
     added++;
   }
-  return { added, skipped };
+  return { added, skipped, sync: undefined };
 }
 
 export default function AdminMembers({ loaderData: d, actionData }: Route.ComponentProps) {
@@ -64,7 +78,29 @@ export default function AdminMembers({ loaderData: d, actionData }: Route.Compon
   });
   return (
     <div>
-      <PageHeader eyebrow="Admin" title="Members" subtitle={`${d.members.length} total`} />
+      <PageHeader
+        eyebrow="Admin"
+        title="Members"
+        subtitle={`${d.members.length} total`}
+        action={
+          <Form method="post">
+            <button name="intent" value="sync" className="btn btn-outline btn-sm" disabled={!d.siteSync} title={d.siteSync ? "Pull sign-ups and payment status from club.crosscourt.social" : "Set the SITE_CRM_KEY secret first"}>
+              ↻ Sync from club site
+            </button>
+          </Form>
+        }
+      />
+      {actionData && "sync" in actionData && actionData.sync && (
+        <Alert kind="success">
+          Synced with the club site: {actionData.sync.created} new, {actionData.sync.activated} activated, {actionData.sync.paused} paused, {actionData.sync.updated} updated, {actionData.sync.skipped} skipped
+          {actionData.sync.invited ? `, ${actionData.sync.invited} welcome emails sent` : ""}.
+          {actionData.sync.errors.length > 0 && ` Errors: ${actionData.sync.errors.join("; ")}`}
+        </Alert>
+      )}
+      {actionData && "error" in actionData && actionData.error && <Alert kind="error">{actionData.error}</Alert>}
+      {!d.siteSync && (
+        <p className="mb-3 text-xs text-ink-50">Automatic sync with club.crosscourt.social is off until the SITE_CRM_KEY secret is set on the Worker (see DEPLOY.md).</p>
+      )}
       <form className="mb-3 flex gap-2">
         <input name="q" defaultValue={q} placeholder="Search name or email" className="input" />
         <input type="hidden" name="f" value={f} />
@@ -126,13 +162,13 @@ export default function AdminMembers({ loaderData: d, actionData }: Route.Compon
       <section className="card mt-8 p-5">
         <h2 className="text-lg font-semibold">Add members in bulk</h2>
         <p className="mt-1 text-sm text-ink-50">
-          One per line: <code>email, name, group</code> (group = mixed or ladies). They're created as active and can sign in straight away with their email.
+          One per line: <code>email, name, group, phone, gender</code> (group = mixed or ladies; phone and gender optional). They're created as active and can sign in straight away.
         </p>
         <Form method="post" className="mt-3 space-y-3">
-          <textarea name="bulk" rows={5} className="textarea font-mono text-sm" placeholder={"ana@example.com, Ana García, ladies\ntom@example.com, Tom Smith, mixed"} />
-          {actionData && (
+          <textarea name="bulk" rows={5} className="textarea font-mono text-sm" placeholder={"ana@example.com, Ana García, ladies, +34 600 000 000, female\ntom@example.com, Tom Smith, mixed, , male"} />
+          {actionData && "added" in actionData && (
             <Alert kind={actionData.added ? "success" : "warn"}>
-              Added {actionData.added}. {actionData.skipped.length > 0 && `Skipped ${actionData.skipped.length} (invalid or already exist).`}
+              Added {actionData.added}. {(actionData.skipped?.length ?? 0) > 0 && `Skipped ${actionData.skipped?.length} (invalid or already exist).`}
             </Alert>
           )}
           <button className="btn btn-ink">Add members</button>

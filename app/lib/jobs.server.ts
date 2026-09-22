@@ -3,6 +3,7 @@ import { getDb, schema } from "./db.server";
 import { notifyUsers } from "./push.server";
 import { addDays, formatDate, todayIn } from "./format";
 import { promoteWaitlist } from "./bookings.server";
+import { siteSyncConfigured, syncFromSite } from "./site-sync.server";
 
 /** Runs hourly (see wrangler.jsonc triggers). Idempotent. */
 export async function runScheduledJobs(env: Env) {
@@ -73,7 +74,16 @@ export async function runScheduledJobs(env: Env) {
     await promoteWaitlist(env, db, match);
   }
 
-  // 4. Auto-complete past sessions and events that admins haven't closed
+  // 4. Pull new sign-ups and payment changes from the club site
+  if (siteSyncConfigured(env)) {
+    try {
+      await syncFromSite(env, (env.APP_URL || "https://ccs-app.plain-sound-433d.workers.dev").replace(/\/$/, ""));
+    } catch (err) {
+      console.error("[site-sync] failed", err);
+    }
+  }
+
+  // 5. Auto-complete past sessions and events that admins haven't closed
   await db.update(schema.matchDays).set({ status: "completed" }).where(and(lt(schema.matchDays.date, today), eq(schema.matchDays.status, "open")));
   await db.update(schema.events).set({ status: "completed" }).where(and(lt(schema.events.date, today), eq(schema.events.status, "open")));
 }
