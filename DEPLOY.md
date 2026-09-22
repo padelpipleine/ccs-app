@@ -81,8 +81,10 @@ Push notifications and the PWA "Add to Home Screen" need HTTPS, which Cloudflare
 2. Within the hour (or when an admin clicks **Sync from club site**), they appear in the app's Members list:
    *paid* → **active**, *started* (began checkout) → **pending**, *lapsed* → **paused**. Their name, phone, gender,
    hand, side, Instagram and self-declared level come across; the coach still sets the real padel level.
-3. Admins get an in-app notification listing new members. If Resend is configured, each new active member is
-   emailed a one-time sign-in link automatically; otherwise open the member and use **Send via WhatsApp**.
+3. Admins get an in-app notification listing new members. If Resend is configured, each new paid member gets one
+   welcome email with a one-time sign-in link, sent the moment they pay (same link as the button on the site's
+   success screen) or, for members found by the hourly sync, when they're first seen. Otherwise open the member
+   and use **Send via WhatsApp**.
 4. **Straight after paying**, the site asks the app for a one-time sign-in link (`POST /webhooks/site-signup`,
    authenticated with the shared key) and sends the member into the app's onboarding questions, signed in with the
    email they paid with. The site's `/welcome` links in older emails redirect there too.

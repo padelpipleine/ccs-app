@@ -1,0 +1,1 @@
+ALTER TABLE `users` ADD `welcome_email_at` text;
