@@ -1,7 +1,7 @@
 export async function sendEmail(env: Env, to: string, subject: string, html: string, text?: string) {
   if (!env.RESEND_API_KEY) {
     console.log(`[email] (RESEND_API_KEY not set) to=${to} subject=${subject}\n${text ?? html}`);
-    return { ok: false, skipped: true as const };
+    return { ok: false, skipped: true as const, detail: "RESEND_API_KEY is not set on the Worker." };
   }
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -15,10 +15,15 @@ export async function sendEmail(env: Env, to: string, subject: string, html: str
     }),
   });
   if (!res.ok) {
-    console.error("[email] failed", res.status, await res.text());
-    return { ok: false, skipped: false as const };
+    const body = await res.text();
+    console.error("[email] failed", res.status, body);
+    let message = body;
+    try {
+      message = (JSON.parse(body) as { message?: string }).message ?? body;
+    } catch {}
+    return { ok: false, skipped: false as const, detail: `Resend responded ${res.status}: ${message}` };
   }
-  return { ok: true, skipped: false as const };
+  return { ok: true, skipped: false as const, detail: `Sent from ${env.EMAIL_FROM ?? "onboarding@resend.dev"}` };
 }
 
 export function loginCodeEmail(code: string, appName: string) {
