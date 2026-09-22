@@ -91,7 +91,11 @@ export default function AdminMember({ loaderData: d, actionData }: Route.Compone
   return (
     <div className="mx-auto max-w-3xl">
       <BackLink to="/admin/members">Members</BackLink>
-      <PageHeader title={m.name || m.email} subtitle={m.email} action={<StatusPill status={m.status} />} />
+      <PageHeader
+        title={m.name || m.email}
+        subtitle={`${m.email}${m.siteStatus ? ` · club site: ${m.siteStatus}${m.membershipPlan ? ` (${m.membershipPlan})` : ""}` : ""}`}
+        action={<StatusPill status={m.status} />}
+      />
       {actionData?.error && <Alert kind="error">{actionData.error}</Alert>}
       {actionData?.success && <Alert kind="success">{actionData.success}</Alert>}
       <div className="grid gap-6 lg:grid-cols-5">
@@ -122,7 +126,7 @@ export default function AdminMember({ loaderData: d, actionData }: Route.Compone
             </Field>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Padel level" hint="Set on level day by the coach.">
+            <Field label="Padel level" hint={m.selfLevel ? `Self-declared on sign-up: ${m.selfLevel}. Set the real level on level day.` : "Set on level day by the coach."}>
               <select name="level" defaultValue={m.level ?? ""} className="select">
                 <option value="">Not assessed</option>
                 {levelOptions().map((l) => (

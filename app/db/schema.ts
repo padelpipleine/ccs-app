@@ -33,6 +33,11 @@ export const users = sqliteTable(
     membershipExpiresAt: text("membership_expires_at"),
     socialPoints: integer("social_points").notNull().default(0),
     adminNotes: text("admin_notes"),
+    // Link to the sign-up site's CRM record (club.crosscourt.social)
+    siteMemberId: text("site_member_id"),
+    siteStatus: text("site_status"), // prospect | contacted | started | paid | lapsed
+    selfLevel: text("self_level"), // what the member said on the welcome form; the coach sets the real level
+    siteSyncedAt: text("site_synced_at"),
     lastSeenAt: text("last_seen_at"),
     createdAt: text("created_at").notNull().default(now),
   },
