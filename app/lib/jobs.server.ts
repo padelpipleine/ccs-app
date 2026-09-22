@@ -4,6 +4,7 @@ import { notifyUsers } from "./push.server";
 import { addDays, formatDate, todayIn } from "./format";
 import { promoteWaitlist } from "./bookings.server";
 import { siteSyncConfigured, syncFromSite } from "./site-sync.server";
+import { reconcilePendingPayments } from "./airwallex.server";
 
 /** Runs hourly (see wrangler.jsonc triggers). Idempotent. */
 export async function runScheduledJobs(env: Env) {
@@ -83,7 +84,14 @@ export async function runScheduledJobs(env: Env) {
     }
   }
 
-  // 5. Auto-complete past sessions and events that admins haven't closed
+  // 5. Settle card payments whose browser never reported back
+  try {
+    await reconcilePendingPayments(env);
+  } catch (err) {
+    console.error("[airwallex] reconcile failed", err);
+  }
+
+  // 6. Auto-complete past sessions and events that admins haven't closed
   await db.update(schema.matchDays).set({ status: "completed" }).where(and(lt(schema.matchDays.date, today), eq(schema.matchDays.status, "open")));
   await db.update(schema.events).set({ status: "completed" }).where(and(lt(schema.events.date, today), eq(schema.events.status, "open")));
 }
