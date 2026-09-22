@@ -1,0 +1,13 @@
+{
+  "name": "Crosscourt Social",
+  "short_name": "Crosscourt",
+  "description": "Mallorca's members' padel club. Book hosted sessions, events and member perks.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F5F1EA",
+  "theme_color": "#0E1020",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

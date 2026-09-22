@@ -1,0 +1,9 @@
+node_modules
+build
+.react-router
+.wrangler
+.dev.vars
+.env
+*.local
+worker-configuration.d.ts
+.DS_Store

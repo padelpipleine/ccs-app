@@ -1,0 +1,13 @@
+# Copy to .dev.vars for local development (never commit .dev.vars).
+SESSION_SECRET=change-me-to-a-long-random-string
+APP_URL=http://localhost:5173
+# Shows the sign-in code on screen instead of emailing it (dev only).
+DEV_SHOW_LOGIN_CODE=1
+# Optional in dev:
+# RESEND_API_KEY=re_xxx
+# EMAIL_FROM=Crosscourt Social <club@crosscourt.social>
+# VAPID_PUBLIC_KEY=   (node scripts/generate-vapid.mjs)
+# VAPID_PRIVATE_KEY=
+# VAPID_SUBJECT=mailto:contact@crosscourt.social
+# STRIPE_SECRET_KEY=sk_test_xxx
+# STRIPE_WEBHOOK_SECRET=whsec_xxx

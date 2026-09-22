@@ -1,0 +1,41 @@
+{
+  "name": "ccs-app",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "react-router build",
+    "dev": "react-router dev",
+    "preview": "npm run build && vite preview",
+    "deploy": "npm run build && wrangler deploy",
+    "cf-typegen": "wrangler types",
+    "typecheck": "npm run cf-typegen && react-router typegen && tsc",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate:local": "wrangler d1 migrations apply ccs-db --local",
+    "db:migrate:remote": "wrangler d1 migrations apply ccs-db --remote",
+    "db:seed:local": "wrangler d1 execute ccs-db --local --file=./scripts/seed.sql",
+    "setup:cloudflare": "node scripts/setup-cloudflare.mjs"
+  },
+  "dependencies": {
+    "@block65/webcrypto-web-push": "^2.0.0",
+    "drizzle-orm": "^0.45.3",
+    "isbot": "^5.1.31",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-router": "^7.18.4",
+    "zod": "^4.3.3"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.57.2",
+    "@react-router/dev": "^7.18.4",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^22.19.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "drizzle-kit": "^0.31.11",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.0",
+    "vite-tsconfig-paths": "^5.1.4",
+    "wrangler": "^4.136.2"
+  }
+}

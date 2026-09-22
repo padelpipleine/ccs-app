@@ -1,0 +1,37 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ccs-app",
+  "main": "./workers/app.ts",
+  "compatibility_date": "2025-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  "assets": { "directory": "./build/client" },
+  // Runs every hour: sends match reminders and expires stale partner invites.
+  "triggers": { "crons": ["0 * * * *"] },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "ccs-db",
+      // Replace with the id printed by `wrangler d1 create ccs-db`
+      // (or run `npm run setup:cloudflare`, which does it for you).
+      "database_id": "REPLACE_WITH_YOUR_D1_DATABASE_ID",
+      "migrations_dir": "drizzle"
+    }
+  ],
+  "vars": {
+    "APP_NAME": "Crosscourt Social",
+    "APP_URL": "https://ccs-app.workers.dev",
+    "TIMEZONE": "Europe/Madrid",
+    // Comma-separated list of emails that are admins automatically.
+    "ADMIN_EMAILS": "hi@jgmetzger.com"
+  }
+  // Secrets (set with `wrangler secret put NAME` or in the Cloudflare dashboard):
+  //   SESSION_SECRET         random string, signs login cookies (required)
+  //   RESEND_API_KEY         sends login codes by email (optional in dev, required in prod)
+  //   EMAIL_FROM             e.g. "Crosscourt Social <club@crosscourt.social>"
+  //   VAPID_PUBLIC_KEY       web push keys (generate with `node scripts/generate-vapid.mjs`)
+  //   VAPID_PRIVATE_KEY
+  //   VAPID_SUBJECT          e.g. "mailto:contact@crosscourt.social"
+  //   STRIPE_SECRET_KEY      optional: enables card payments for extra matches & tickets
+  //   STRIPE_WEBHOOK_SECRET  optional: confirms payments automatically
+}
