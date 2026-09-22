@@ -1,7 +1,7 @@
 import { Form, redirect, useNavigation } from "react-router";
 import { eq } from "drizzle-orm";
 import type { Route } from "./+types/onboarding";
-import { needsOnboarding, requireUser } from "~/lib/auth.server";
+import { membershipBlocked, needsOnboarding, requireUser } from "~/lib/auth.server";
 import { getDb, schema } from "~/lib/db.server";
 import { firstError, formToObject, profileSchema, profileToUpdate } from "~/lib/validate";
 import { Alert, Field } from "~/components/ui";
@@ -12,6 +12,7 @@ export const meta: Route.MetaFunction = () => [{ title: "Your player profile · 
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   const user = await requireUser(request, context.cloudflare.env);
+  if (membershipBlocked(user)) throw redirect("/membership");
   if (!needsOnboarding(user)) throw redirect("/");
   return { user };
 }

@@ -6,6 +6,7 @@ export default [
   route("login/link", "routes/login-link.tsx"),
   route("logout", "routes/logout.tsx"),
   route("onboarding", "routes/onboarding.tsx"),
+  route("membership", "routes/membership.tsx"),
   route("api/push", "routes/api.push.tsx"),
   route("api/photo", "routes/api.photo.tsx"),
   route("pay/:type/:id", "routes/pay.tsx"),
