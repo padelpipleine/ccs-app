@@ -14,7 +14,7 @@
       "database_name": "ccs-db",
       // Replace with the id printed by `wrangler d1 create ccs-db`
       // (or run `npm run setup:cloudflare`, which does it for you).
-      "database_id": "REPLACE_WITH_YOUR_D1_DATABASE_ID",
+      "database_id": "0148ef9a-737c-4e89-a628-6481ef3d0d0c",
       "migrations_dir": "drizzle"
     }
   ],
