@@ -7,9 +7,15 @@ Static files are served by the Worker's built-in assets. There is nothing else t
 > entry (`workers/app.ts`), a D1 binding and a cron trigger, which Pages does not support.
 > If you already created a Pages project for this repo, delete it and follow the steps below.
 
-## 1. One-time setup: the database
+## 1. One-time setup: database and photo storage
 
-The Worker needs one D1 database called `ccs-db`. Create it once, either way:
+The Worker needs one D1 database called `ccs-db` and one R2 bucket called `ccs-photos` (member profile photos).
+
+**Photos bucket:** dashboard → R2 Object Storage → Create bucket → name `ccs-photos` (or `npx wrangler r2 bucket create ccs-photos`).
+Nothing else to configure; the app serves photos itself at `/photos/…`. Without the bucket, deploys fail with
+*"R2 bucket ccs-photos not found"*.
+
+**Database:** create it once, either way:
 
 - **Dashboard:** Storage & Databases → D1 SQL Database → Create → name `ccs-db` → copy its **Database ID**.
 - **Terminal:** `npx wrangler login` then `npx wrangler d1 create ccs-db` and copy the id it prints.
@@ -54,6 +60,7 @@ Also set `ADMIN_EMAILS` in `wrangler.jsonc` to the admins' emails, comma separat
 - *"assets.directory … does not exist"*: the build didn't run. Set Build command to `npm run build` (or pull the
   latest code, which builds on install).
 - *"binding DB of type d1 must have a valid database_id"*: step 1 above wasn't done.
+- *"R2 bucket … not found"*: create the `ccs-photos` bucket (step 1).
 - *"Couldn't find a D1 DB with the name or binding"*: the id in `wrangler.jsonc` doesn't belong to this account.
 - Project created as **Pages** instead of Workers: Pages can't run this app; recreate it under Workers.
 

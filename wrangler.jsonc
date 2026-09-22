@@ -8,6 +8,9 @@
   "assets": { "directory": "./build/client" },
   // Runs every hour: sends match reminders and expires stale partner invites.
   "triggers": { "crons": ["0 * * * *"] },
+  // Member profile photos. Create the bucket once: dashboard → R2 → Create bucket → "ccs-photos"
+  // (or `npx wrangler r2 bucket create ccs-photos`).
+  "r2_buckets": [{ "binding": "PHOTOS", "bucket_name": "ccs-photos" }],
   "d1_databases": [
     {
       "binding": "DB",

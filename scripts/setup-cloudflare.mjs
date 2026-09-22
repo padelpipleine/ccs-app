@@ -3,7 +3,7 @@
 //   npm run setup:cloudflare
 //
 // It will:
-//   1. create the D1 database (or reuse it) and write its id into wrangler.jsonc
+//   1. create the D1 database (or reuse it) and write its id into wrangler.jsonc, and the ccs-photos R2 bucket
 //   2. apply database migrations to the remote D1
 //   3. set SESSION_SECRET and VAPID push keys as Worker secrets (if not skipped)
 //   4. deploy the Worker
@@ -39,6 +39,15 @@ if (cfg.includes("REPLACE_WITH_YOUR_D1_DATABASE_ID")) {
   console.log(`\n✔ wrangler.jsonc updated with database_id ${dbId} — commit this change.`);
 } else {
   console.log(`\n✔ wrangler.jsonc already has a database_id (${dbId} exists on your account).`);
+}
+
+// 1b. R2 bucket for profile photos (idempotent)
+try {
+  const buckets = run("npx wrangler r2 bucket list", { capture: true });
+  if (!/\bccs-photos\b/.test(buckets)) run("npx wrangler r2 bucket create ccs-photos");
+  else console.log("\n✔ R2 bucket ccs-photos already exists.");
+} catch {
+  run("npx wrangler r2 bucket create ccs-photos");
 }
 
 // 2. Migrations
