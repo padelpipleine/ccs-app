@@ -5,6 +5,8 @@
   "compatibility_date": "2025-09-01",
   "compatibility_flags": ["nodejs_compat"],
   "observability": { "enabled": true },
+  // Never let a deploy wipe variables that were added in the Cloudflare dashboard.
+  "keep_vars": true,
   "assets": { "directory": "./build/client" },
   // Runs every hour: sends match reminders and expires stale partner invites.
   "triggers": { "crons": ["0 * * * *"] },
