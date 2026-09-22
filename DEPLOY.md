@@ -50,6 +50,7 @@ Merging a pull request into `main` deploys live; pushes to other branches upload
 | `DEV_SHOW_LOGIN_CODE` | Temporary | Set to `1` to show the sign-in code on screen while email isn't configured yet. **Remove before members use it.** |
 | `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | For push (free) | Sign in as admin → Dashboard → setup checklist → **Generate push keys**, then paste the three values. (Or run `node scripts/generate-vapid.mjs`.) |
 | `SITE_CRM_KEY` | Recommended | The `CRM_KEY` value from the sign-up site's `club/wrangler.jsonc` (repo `padelpipleine/crosscourtsocial`). Lets the app pull sign-ups and payment status from club.crosscourt.social every hour, and on demand from Admin → Members → "Sync from club site". |
+| `AIRWALLEX_CLIENT_ID`, `AIRWALLEX_API_KEY` | For card payments of in-app extras | The same values the sign-up site uses (GitHub → `crosscourtsocial` → Settings → Secrets, or Airwallex → Developer → API keys). Then choose "Card in the app via Airwallex" in Admin → Club settings → Payments. |
 | `STRIPE_SECRET_KEY` | Optional | Stripe → Developers → API keys. Enables card payments. |
 | `STRIPE_WEBHOOK_SECRET` | Optional | Stripe → Webhooks → endpoint `https://<worker-url>/webhooks/stripe`, event `checkout.session.completed`. |
 

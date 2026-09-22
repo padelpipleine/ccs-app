@@ -4,6 +4,7 @@ import { requireAdmin } from "~/lib/auth.server";
 import { getDb } from "~/lib/db.server";
 import { DEFAULT_SETTINGS, getSettings, setSetting, type SettingKey } from "~/lib/settings.server";
 import { stripeEnabled } from "~/lib/payments.server";
+import { airwallexConfigured } from "~/lib/airwallex.server";
 import { Alert, Field, PageHeader } from "~/components/ui";
 
 export const meta: Route.MetaFunction = () => [{ title: "Club settings · Admin" }];
@@ -11,7 +12,7 @@ export const meta: Route.MetaFunction = () => [{ title: "Club settings · Admin"
 export async function loader({ request, context }: Route.LoaderArgs) {
   const env = context.cloudflare.env;
   await requireAdmin(request, env);
-  return { s: await getSettings(getDb(env)), stripe: stripeEnabled(env) };
+  return { s: await getSettings(getDb(env)), stripe: stripeEnabled(env), airwallex: airwallexConfigured(env) };
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
@@ -25,12 +26,13 @@ export async function action({ request, context }: Route.ActionArgs) {
     let value = v.trim();
     if (key === "extraSessionPriceCents") value = String(Math.round((Number(value) || 0) * 100));
     if (key === "paymentMode" && value === "stripe" && !stripeEnabled(env)) value = "manual";
+    if (key === "paymentMode" && value === "airwallex" && !airwallexConfigured(env)) value = "manual";
     await setSetting(db, key, value);
   }
   return { success: "Settings saved." };
 }
 
-export default function Settings({ loaderData: { s, stripe }, actionData }: Route.ComponentProps) {
+export default function Settings({ loaderData: { s, stripe, airwallex }, actionData }: Route.ComponentProps) {
   const nav = useNavigation();
   return (
     <div className="mx-auto max-w-2xl">
@@ -64,11 +66,18 @@ export default function Settings({ loaderData: { s, stripe }, actionData }: Rout
         </section>
         <section className="card space-y-4 p-5">
           <h2 className="font-display font-semibold text-ink">Payments</h2>
+          <p className="text-sm text-ink-70">
+            Membership fees are taken on the sign-up site (Airwallex). This is only about the extras inside the app: a second hosted session in a
+            week and event tickets.
+          </p>
           <Field label="How members pay for extras & tickets">
             <select name="paymentMode" defaultValue={s.paymentMode} className="select">
               <option value="manual">Manual (Bizum / transfer, you mark as paid)</option>
+              <option value="airwallex" disabled={!airwallex}>
+                Card in the app via Airwallex {airwallex ? "" : "(needs the AIRWALLEX_CLIENT_ID and AIRWALLEX_API_KEY secrets)"}
+              </option>
               <option value="stripe" disabled={!stripe}>
-                Card via Stripe {stripe ? "" : "(add STRIPE_SECRET_KEY to enable)"}
+                Card in the app via Stripe {stripe ? "" : "(optional; needs the STRIPE_SECRET_KEY secret)"}
               </option>
             </select>
           </Field>

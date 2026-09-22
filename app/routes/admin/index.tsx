@@ -70,7 +70,6 @@ export default function AdminIndex({ loaderData: d, actionData }: Route.Componen
     [d.setup.email, "Email (Resend) configured", "Members can't receive sign-in codes until RESEND_API_KEY and EMAIL_FROM are set as Secrets on the Worker."],
     [d.setup.push, "Push notifications configured", "Free. Generate a key pair below and add it as Worker secrets."],
     [d.setup.siteSync, "Sync with club.crosscourt.social", "Set SITE_CRM_KEY (the CRM key from the site's wrangler.jsonc) so sign-ups and payments flow into Members automatically every hour."],
-    [d.setup.stripe, "Card payments (Stripe)", "Optional. Without it, payments are manual (Bizum/transfer) and you mark them paid."],
   ] as const;
   const missing = setupItems.filter(([ok]) => !ok);
   return (
