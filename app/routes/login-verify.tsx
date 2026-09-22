@@ -37,7 +37,7 @@ export default function Verify({ loaderData, actionData }: Route.ComponentProps)
           Dev mode, email not configured. Your code is <strong>{loaderData.dev}</strong>.
         </Alert>
       )}
-      {loaderData.nomail && <Alert kind="error">Email sending isn't configured yet. Ask the club admin to set RESEND_API_KEY.</Alert>}
+      {loaderData.nomail && <Alert kind="error">We couldn't email your code right now. Ask the club to send you a sign-in link on WhatsApp instead.</Alert>}
       <Form method="post" className="mt-6 space-y-4">
         <input type="hidden" name="email" value={loaderData.email} />
         <input type="hidden" name="next" value={loaderData.next} />
