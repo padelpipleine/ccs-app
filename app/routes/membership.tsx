@@ -1,6 +1,7 @@
 import { Form, redirect, useNavigation } from "react-router";
 import type { Route } from "./+types/membership";
-import { JOIN_URL, membershipBlocked, requireUser } from "~/lib/auth.server";
+import { membershipBlocked, requireUser } from "~/lib/auth.server";
+import { JOIN_URL } from "~/lib/format";
 import { fetchSiteMembers, siteSyncConfigured, upsertSiteMember } from "~/lib/site-sync.server";
 import { getDb } from "~/lib/db.server";
 import { Alert } from "~/components/ui";

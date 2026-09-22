@@ -66,8 +66,6 @@ export async function createLoginLink(env: Env, origin: string, rawEmail: string
   return `${origin}/login/link?${new URLSearchParams({ email, token })}`;
 }
 
-export const JOIN_URL = "https://club.crosscourt.social/";
-
 /** Only existing members (created by the sign-up site, the sync, a sign-in link or an admin) and configured admins can sign in. */
 export async function isKnownMember(env: Env, email: string): Promise<boolean> {
   if (isAdminEmail(env, email)) return true;

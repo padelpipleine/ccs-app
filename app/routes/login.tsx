@@ -1,6 +1,7 @@
 import { Form, redirect, useNavigation } from "react-router";
 import type { Route } from "./+types/login";
-import { getUser, JOIN_URL, startLogin } from "~/lib/auth.server";
+import { getUser, startLogin } from "~/lib/auth.server";
+import { JOIN_URL } from "~/lib/format";
 import { Alert, Field } from "~/components/ui";
 
 export const meta: Route.MetaFunction = () => [{ title: "Sign in · Crosscourt Social" }];

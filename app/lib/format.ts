@@ -1,5 +1,7 @@
 // Shared helpers (safe on server and client).
 
+export const JOIN_URL = "https://club.crosscourt.social/";
+
 export const LEVEL_MIN = 1;
 export const LEVEL_MAX = 7;
 export const LEVEL_STEP = 0.5;
